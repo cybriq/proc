@@ -6,4 +6,4 @@ import (
 	"gitlab.com/cybriqsystems/proc/version"
 )
 
-var log = proc.Get(version.PathBase)
+var log = proc.GetLogger(version.PathBase)

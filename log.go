@@ -101,17 +101,19 @@ var LevelSpecs = map[LogLevel]LevelSpec{
 }
 
 var (
-	tty, file      io.Writer = os.Stderr, nil
-	writer                   = tty
-	AppColorizer             = color.Gray.Sprint
-	logger_started           = time.Now()
-	logLevel                 = Trace
+	tty, file io.Writer = os.Stderr, nil
+	writer              = tty
+	logLevel            = Trace
 	// App is the name of the application
 	App = "  main"
 	// AllSubsystems stores all of the package subsystem names found in the current
 	// application
 	AllSubsystems []string
 )
+
+func SetLogLevel(l LogLevel) {
+	logLevel = l
+}
 
 // GetLoc calls runtime.Caller and formats as expected by source code editors
 // for terminal hyperlinks
@@ -127,23 +129,6 @@ var (
 */
 // I have used a shell variable there but tilix doesn't expand them,
 // so put your GOPATH in manually, and obviously change the repo subpath.
-//
-// Change the path to use with another repository's logging output (
-// someone with more time on their hands could probably come up with
-// something, but frankly the custom links feature of Tilix has the absolute
-// worst UX I have encountered since the 90s...
-// Maybe in the future this library will be expanded with a tool that more
-// intelligently sets the path, ie from CWD or other cleverness.
-//
-// This matches full paths anywhere on the commandline delimited by spaces:
-//
-// ([/](([\/a-zA-Z@0-9-_.]+/)+([a-zA-Z@0-9-_.]+)):([0-9]+))
-//
-// 		goland --line $5 /$2
-//
-// Adapt the invocation to open your preferred editor if it has the capability,
-// the above is for Jetbrains Goland
-//
 func GetLoc(skip int, subsystem string) (output string) {
 	_, file, line, _ := runtime.Caller(skip)
 	defer func() {
@@ -171,8 +156,15 @@ func GetLoc(skip int, subsystem string) (output string) {
 	}
 	return
 }
-func getTimeText(level LogLevel) string {
-	return time.Now().Format("2006-01-02T15:04:05.000000Z07:00")
+
+var timeStampFormat = "2006-01-02T15:04:05.000000Z07:00"
+
+func SetTimeStampFormat(format string) {
+	timeStampFormat = format
+}
+
+func getTimeText() string {
+	return time.Now().Format(timeStampFormat)
 }
 
 // joinStrings constructs a string from an slice of interface same as Println
@@ -201,7 +193,7 @@ func logPrint(
 				fmt.Sprintf(
 					"%-58v%s%s%-6v %s\n",
 					GetLoc(3, subsystem),
-					AppColorizer(getTimeText(level)),
+					color.Gray.Sprint(getTimeText()),
 					fmt.Sprint(" ["+App+"]"),
 					LevelSpecs[level].Colorizer(
 						" "+LevelSpecs[level].Name+" ",
@@ -240,8 +232,8 @@ func Add(pathBase string) (subsystem string) {
 	return
 }
 
-// Get returns a set of LevelPrinter with their subsystem preloaded
-func Get(pathBase string) (l *Logger) {
+// GetLogger returns a set of LevelPrinter with their subsystem preloaded
+func GetLogger(pathBase string) (l *Logger) {
 	ss := Add(pathBase)
 	// fmt.Println("subsystems:", AllSubsystems)
 	return &Logger{
