@@ -89,14 +89,12 @@ func main() {
 			prs := s[2]
 			if strings.HasPrefix(prs, "v") {
 				var va [3]int
-				var meta string
 				_, _ = fmt.Sscanf(
 					prs,
-					"v%d.%d.%d%s",
+					"v%d.%d.%d",
 					&va[0],
 					&va[1],
 					&va[2],
-					&meta,
 				)
 				vn := va[0]*1000000 + va[1]*1000 + va[2]
 				if maxVersion < vn {
@@ -105,7 +103,6 @@ func main() {
 					Major = va[0]
 					Minor = va[1]
 					Patch = va[2]
-					Meta = meta
 				}
 				if pr.Hash() == rh.Hash() {
 					maxIs = true
@@ -151,8 +148,6 @@ var (
 	Minor = %d
 	// Patch is the patch version number from the tag
 	Patch = %d
-	// Meta is the extra arbitrary string field from Semver spec
-	Meta = "%s"
 )
 
 // Get returns a pretty printed version information string
@@ -167,7 +162,6 @@ func Get() string {
 		"\tMajor:", Major, "\n",
 		"\tMinor:", Minor, "\n",
 		"\tPatch:", Patch, "\n",
-		"\tMeta: ", Meta, "\n",
 	)
 }
 `
@@ -182,7 +176,6 @@ func Get() string {
 		Major,
 		Minor,
 		Patch,
-		Meta,
 	)
 	path := filepath.Join(filepath.Join(PathBase, "version"), "version.go")
 	if e = ioutil.WriteFile(path, []byte(versionFileOut), 0666); log.E.Chk(e) {
@@ -198,7 +191,6 @@ func Get() string {
 		"\tMajor:", Major, "\n",
 		"\tMinor:", Minor, "\n",
 		"\tPatch:", Patch, "\n",
-		"\tMeta: ", Meta, "\n",
 	)
 	return
 }

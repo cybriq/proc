@@ -12,12 +12,12 @@ var (
 	// GitRef is the gitref, as in refs/heads/branchname
 	GitRef = "refs/heads/master"
 	// GitCommit is the commit hash of the current HEAD
-	GitCommit = "9344529d1b6b0bb52c3d924a47c5dc256da64bbb"
+	GitCommit = "c283d9031bfbb053284471813268764a750f7b05"
 	// BuildTime stores the time when the current binary was built
-	BuildTime = "2022-07-04T17:46:38+03:00"
+	BuildTime = "2022-07-04T18:12:59+03:00"
 	// Tag lists the Tag on the build, adding a + to the newest Tag if the commit is
 	// not that commit
-	Tag = "v0.0.2"
+	Tag = "v0.0.3"
 	// PathBase is the path base returned from runtime caller
 	PathBase = "/home/davidvennik/src/gitlab.com/cybriqsystems/proc/"
 	// Major is the major number from the tag
@@ -25,9 +25,7 @@ var (
 	// Minor is the minor number from the tag
 	Minor = 0
 	// Patch is the patch version number from the tag
-	Patch = 2
-	// Meta is the extra arbitrary string field from Semver spec
-	Meta = ""
+	Patch = 3
 )
 
 // Get returns a pretty printed version information string
@@ -42,6 +40,5 @@ func Get() string {
 		"\tMajor:", Major, "\n",
 		"\tMinor:", Minor, "\n",
 		"\tPatch:", Patch, "\n",
-		"\tMeta: ", Meta, "\n",
 	)
 }

@@ -108,9 +108,9 @@ var (
 	logLevel                 = Trace
 	// App is the name of the application
 	App = "  main"
-	// allSubsystems stores all of the package subsystem names found in the current
+	// AllSubsystems stores all of the package subsystem names found in the current
 	// application
-	allSubsystems []string
+	AllSubsystems []string
 )
 
 // GetLoc calls runtime.Caller and formats as expected by source code editors
@@ -172,7 +172,7 @@ func GetLoc(skip int, subsystem string) (output string) {
 	return
 }
 func getTimeText(level LogLevel) string {
-	return time.Now().Format(time.StampMilli)
+	return time.Now().Format("2006-01-02T15:04:05.000000Z07:00")
 }
 
 // joinStrings constructs a string from an slice of interface same as Println
@@ -217,38 +217,24 @@ func logPrint(
 // call this function right at the top of the main, which runs after
 // declarations and main/init. Really this is just here to alert the reader.
 func sortSubsystemsList() {
-	sort.Strings(allSubsystems)
+	sort.Strings(AllSubsystems)
 }
 
 // Add adds a subsystem to the list of known subsystems and returns the
 // string so it is nice and neat in the package logg.go file
 func Add(pathBase string) (subsystem string) {
-	// var split []string
 	var ok bool
 	var file string
 	_, file, _, ok = runtime.Caller(2)
 	if ok {
 		r := strings.Split(file, pathBase)
-		// fmt.Fprintln(os.Stderr, pathBase, r)
 		fromRoot := filepath.Base(file)
-		// fmt.Fprintln(os.Stderr, fromRoot)
 		if len(r) > 1 {
 			fromRoot = r[1]
 		}
-		// fmt.Fprintln(os.Stderr, fromRoot)
 		split := strings.Split(fromRoot, "/")
-		// fmt.Fprintln(
-		// 	os.Stderr,
-		// 	pathBase,
-		// 	"file",
-		// 	file,
-		// 	r,
-		// 	fromRoot,
-		// 	split,
-		// )
 		subsystem = strings.Join(split[:len(split)-1], "/")
-		// fmt.Fprintln(os.Stderr, "adding subsystem", subsystem)
-		allSubsystems = append(allSubsystems, subsystem)
+		AllSubsystems = append(AllSubsystems, subsystem)
 		sortSubsystemsList()
 	}
 	return
@@ -257,7 +243,7 @@ func Add(pathBase string) (subsystem string) {
 // Get returns a set of LevelPrinter with their subsystem preloaded
 func Get(pathBase string) (l *Logger) {
 	ss := Add(pathBase)
-	// fmt.Println("subsystems:", allSubsystems)
+	// fmt.Println("subsystems:", AllSubsystems)
 	return &Logger{
 		getOnePrinter(Fatal, ss),
 		getOnePrinter(Error, ss),
@@ -288,7 +274,7 @@ func _s(level LogLevel, subsystem string) Prints {
 	return func(a ...interface{}) {
 		logPrint(
 			level, subsystem, func() string {
-				return fmt.Sprint("\n\n" + spew.Sdump(a...) + "\n")
+				return fmt.Sprint("spew:\n\n" + spew.Sdump(a...))
 			},
 		)()
 	}
