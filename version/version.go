@@ -12,12 +12,12 @@ var (
 	// GitRef is the gitref, as in refs/heads/branchname
 	GitRef = "refs/heads/master"
 	// GitCommit is the commit hash of the current HEAD
-	GitCommit = "66e962cae027298169c4a9782c1840af06216b13"
+	GitCommit = "9344529d1b6b0bb52c3d924a47c5dc256da64bbb"
 	// BuildTime stores the time when the current binary was built
-	BuildTime = "2022-07-04T16:35:55+03:00"
+	BuildTime = "2022-07-04T17:46:38+03:00"
 	// Tag lists the Tag on the build, adding a + to the newest Tag if the commit is
 	// not that commit
-	Tag = "v0.0.1"
+	Tag = "v0.0.2"
 	// PathBase is the path base returned from runtime caller
 	PathBase = "/home/davidvennik/src/gitlab.com/cybriqsystems/proc/"
 	// Major is the major number from the tag
@@ -25,7 +25,7 @@ var (
 	// Minor is the minor number from the tag
 	Minor = 0
 	// Patch is the patch version number from the tag
-	Patch = 1
+	Patch = 2
 	// Meta is the extra arbitrary string field from Semver spec
 	Meta = ""
 )

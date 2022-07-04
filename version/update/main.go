@@ -8,11 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"gitlab.com/cybriqsystems/proc"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/storer"
-
-	"github.com/cybriq/log/version"
 )
 
 var (
@@ -27,7 +26,7 @@ var (
 )
 
 func main() {
-	fmt.Println(version.Get())
+	proc.App = "version updater"
 	BuildTime = time.Now().Format(time.RFC3339)
 	var cwd string
 	var e error
@@ -35,8 +34,7 @@ func main() {
 		fmt.Println(e)
 		return
 	}
-	// cwd = filepath.Dir(cwd)
-	// log.I.Ln(cwd)
+	cwd = filepath.Dir(cwd)
 	var repo *git.Repository
 	if repo, e = git.PlainOpen(cwd); log.E.Chk(e) {
 		fmt.Println(e)
@@ -190,6 +188,17 @@ func Get() string {
 	if e = ioutil.WriteFile(path, []byte(versionFileOut), 0666); log.E.Chk(e) {
 		fmt.Println(e)
 	}
-	// I.Ln("updated version.go written")
+	log.I.Ln(
+		"\nRepository Information\n",
+		"\tGit repository: "+URL+"\n",
+		"\tBranch: "+GitRef+"\n",
+		"\tCommit: "+GitCommit+"\n",
+		"\tBuilt: "+BuildTime+"\n",
+		"\tTag: "+Tag+"\n",
+		"\tMajor:", Major, "\n",
+		"\tMinor:", Minor, "\n",
+		"\tPatch:", Patch, "\n",
+		"\tMeta: ", Meta, "\n",
+	)
 	return
 }

@@ -1,4 +1,4 @@
-package log
+package proc
 
 import (
 	"fmt"
@@ -91,8 +91,8 @@ func gLS(lvl LogLevel, r, g, b byte) LevelSpec {
 // LevelSpecs specifies the id, string name and color-printing function
 var LevelSpecs = map[LogLevel]LevelSpec{
 	Off:   gLS(Off, 0, 0, 0),
-	Fatal: gLS(Fatal, 128, 0, 0),
-	Error: gLS(Error, 255, 0, 0),
+	Fatal: gLS(Fatal, 255, 0, 0),
+	Error: gLS(Error, 255, 128, 0),
 	Check: gLS(Check, 255, 255, 0),
 	Warn:  gLS(Warn, 255, 255, 0),
 	Info:  gLS(Info, 0, 255, 0),
@@ -123,7 +123,7 @@ var (
 // the very beginning of the line as this logger prints:
 /*
 	^((([\/a-zA-Z@0-9-_.]+/)+([a-zA-Z@0-9-_.]+)):([0-9]+))
-	goland --line $5 $GOPATH/src/github.com/p9c/matrjoska/$2
+	/usr/local/bin/goland --line $5 $GOPATH/src/github.com/p9c/matrjoska/$2
 */
 // I have used a shell variable there but tilix doesn't expand them,
 // so put your GOPATH in manually, and obviously change the repo subpath.
@@ -202,7 +202,7 @@ func logPrint(
 					"%-58v%s%s%-6v %s\n",
 					GetLoc(3, subsystem),
 					AppColorizer(getTimeText(level)),
-					fmt.Sprint(AppColorizer(" "+App)),
+					fmt.Sprint(" ["+App+"]"),
 					LevelSpecs[level].Colorizer(
 						" "+LevelSpecs[level].Name+" ",
 					),
