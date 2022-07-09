@@ -30,4 +30,4 @@ func (in *Int) Float() float64          { panic("type error") }
 func (in *Int) String() string          { return fmt.Sprint(in.value.Load()) }
 func (in *Int) List() []string          { panic("type error") }
 
-func (in *Int) Set(bo int) { in.value.Store(int64(bo)) }
+func (in *Int) Set(i int) { in.value.Store(int64(i)) }

@@ -30,4 +30,4 @@ func (u *Uint) Float() float64          { panic("type error") }
 func (u *Uint) String() string          { return fmt.Sprint(u.value.Load()) }
 func (u *Uint) List() []string          { panic("type error") }
 
-func (u *Uint) Set(bo int) { u.value.Store(uint64(bo)) }
+func (u *Uint) Set(ui int) { u.value.Store(uint64(ui)) }

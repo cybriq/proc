@@ -30,4 +30,4 @@ func (f *Float) Float() float64          { return f.value.Load() }
 func (f *Float) String() string          { return fmt.Sprint(f.value.Load()) }
 func (f *Float) List() []string          { panic("type error") }
 
-func (f *Float) Set(bo float64) { f.value.Store(bo) }
+func (f *Float) Set(fl float64) { f.value.Store(fl) }
