@@ -212,7 +212,7 @@ func Version() string {
 		}
 		commitString := strings.Join(os.Args[2:], " ")
 		log.I.Ln("committing with commit string:", commitString)
-		e = runCmd("git", "commit", "-m'"+commitString+"'")
+		e = runCmd("git", "commit", "-m"+commitString)
 		if log.E.Chk(e) {
 			panic(e)
 		}
