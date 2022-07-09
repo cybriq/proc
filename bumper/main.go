@@ -217,7 +217,7 @@ func runCmd(cmd ...string) (err error) {
 	c := exec.Command(cmd[0], cmd[1:]...)
 	var output []byte
 	output, err = c.CombinedOutput()
-	if err == nil && err.Error() != "" {
+	if err == nil && string(output) != "" {
 		log.I.Ln("\n", string(output))
 	}
 	return
