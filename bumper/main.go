@@ -218,7 +218,7 @@ func runCmd(cmd ...string) (err error) {
 	var output []byte
 	output, err = c.CombinedOutput()
 	if err == nil {
-		log.I.Ln(string(output))
+		log.I.Ln("\n", string(output))
 	}
 	return
 }
