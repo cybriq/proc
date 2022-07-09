@@ -5,14 +5,13 @@ import (
 	"time"
 
 	"gitlab.com/cybriqsystems/proc"
-	"gitlab.com/cybriqsystems/proc/version"
 )
 
-var log = proc.GetLogger(version.PathBase)
+var log = proc.GetLogger(proc.PathBase)
 
 func main() {
 	proc.App = "logtest"
-	log.I.C(version.Get)
+	log.I.C(proc.Get)
 	log.T.Ln("testing")
 	log.D.Ln("testing")
 	log.I.Ln("testing")

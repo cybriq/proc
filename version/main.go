@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -19,13 +20,26 @@ var (
 	GitRef              string
 	GitCommit           string
 	BuildTime           string
-	Tag                 string
+	SemVer              string
 	Major, Minor, Patch int
 	Meta                string
 	PathBase            string
 )
 
 func main() {
+	var bump bool
+	if len(os.Args) > 1 {
+		if os.Args[1] == "bump" {
+			if len(os.Args) < 3 {
+				panic(
+					"if bumping version please add commit comment after" +
+						" bump keyword",
+				)
+			}
+			bump = true
+		}
+	}
+
 	proc.App = "version updater"
 	BuildTime = time.Now().Format(time.RFC3339)
 	var cwd string
@@ -34,7 +48,6 @@ func main() {
 		fmt.Println(e)
 		return
 	}
-	cwd = filepath.Dir(cwd)
 	var repo *git.Repository
 	if repo, e = git.PlainOpen(cwd); log.E.Chk(e) {
 		fmt.Println(e)
@@ -115,14 +128,18 @@ func main() {
 		fmt.Println(e)
 		return
 	}
+	if bump {
+		Patch++
+		maxString = fmt.Sprintf("v%d.%d.%d", Major, Minor, Patch)
+	}
 	if !maxIs {
 		maxString += "+"
 	}
-	Tag = maxString
+	SemVer = maxString
 	PathBase = tr.Filesystem.Root() + "/"
-	versionFile := `package version
+	versionFile := `package proc
 
-` + `//go:generate go run ./update/.
+` + `//go:generate go run ./version/.
 
 import (
 	"fmt"
@@ -137,9 +154,8 @@ var (
 	GitCommit = "%s"
 	// BuildTime stores the time when the current binary was built
 	BuildTime = "%s"
-	// Tag lists the Tag on the build, adding a + to the newest Tag if the commit is
-	// not that commit
-	Tag = "%s"
+	// SemVer lists the (latest) git tag on the build
+	SemVer = "%s"
 	// PathBase is the path base returned from runtime caller
 	PathBase = "%s"
 	// Major is the major number from the tag
@@ -150,18 +166,15 @@ var (
 	Patch = %d
 )
 
-// Get returns a pretty printed version information string
-func Get() string {
+// Version returns a pretty printed version information string
+func Version() string {
 	return fmt.Sprint(
 		"\nRepository Information\n",
 		"\tGit repository: "+URL+"\n",
 		"\tBranch: "+GitRef+"\n",
 		"\tCommit: "+GitCommit+"\n",
 		"\tBuilt: "+BuildTime+"\n",
-		"\tTag: "+Tag+"\n",
-		"\tMajor:", Major, "\n",
-		"\tMinor:", Minor, "\n",
-		"\tPatch:", Patch, "\n",
+		"\tSemVer: "+SemVer+"\n",
 	)
 }
 `
@@ -171,13 +184,13 @@ func Get() string {
 		GitRef,
 		GitCommit,
 		BuildTime,
-		Tag,
+		SemVer,
 		PathBase,
 		Major,
 		Minor,
 		Patch,
 	)
-	path := filepath.Join(filepath.Join(PathBase, "version"), "version.go")
+	path := filepath.Join(PathBase, "version.go")
 	if e = ioutil.WriteFile(path, []byte(versionFileOut), 0666); log.E.Chk(e) {
 		fmt.Println(e)
 	}
@@ -187,10 +200,46 @@ func Get() string {
 		"\tBranch: "+GitRef+"\n",
 		"\tCommit: "+GitCommit+"\n",
 		"\tBuilt: "+BuildTime+"\n",
-		"\tTag: "+Tag+"\n",
+		"\tSemVer: "+SemVer+"\n",
 		"\tMajor:", Major, "\n",
 		"\tMinor:", Minor, "\n",
 		"\tPatch:", Patch, "\n",
 	)
+	if bump {
+		e = runCmd("git", "add", ".")
+		if log.E.Chk(e) {
+			panic(e)
+		}
+		commitString := strings.Join(os.Args[2:], " ")
+		log.I.Ln("committing with commit string:", commitString)
+		e = runCmd("git", "commit", "-m'"+commitString+"'")
+		if log.E.Chk(e) {
+			panic(e)
+		}
+		e = runCmd("git", "tag", SemVer)
+		if log.E.Chk(e) {
+			panic(e)
+		}
+		gr := strings.Split(GitRef, "/")
+		branch := gr[2]
+		e = runCmd("git", "push", "origin", branch)
+		if log.E.Chk(e) {
+			panic(e)
+		}
+		e = runCmd("git", "push", "origin", SemVer)
+		if log.E.Chk(e) {
+			panic(e)
+		}
+	}
+	return
+}
+
+func runCmd(cmd ...string) (err error) {
+	c := exec.Command(cmd[0], cmd[1:]...)
+	var output []byte
+	output, err = c.CombinedOutput()
+	if err == nil {
+		log.I.Ln(string(output))
+	}
 	return
 }
