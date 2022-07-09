@@ -25,6 +25,19 @@ following the principles of design used for Go itself.
 
 ## Installation
 
+### For developers:
+
+To bump patch version and make a commit, install the program in [bumper/](./bumper), run with the commit string 
+after the command. To install:
+
+    go install ./bumper/.
+
+To use:
+
+    bumper make a commit comment here -- text after double \
+        hyphen will be separated by a carriage return -- \
+        anywhere in the text
+
 ## Usage
 
 reasonably include in the README.

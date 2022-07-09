@@ -191,6 +191,9 @@ func Version() string {
 		panic(e)
 	}
 	commitString := strings.Join(os.Args[2:], " ")
+
+	strings.ReplaceAll(commitString, " -- ", "\n")
+
 	e = runCmd("git", "commit", "-m"+commitString)
 	if log.E.Chk(e) {
 		panic(e)
