@@ -191,7 +191,6 @@ func Version() string {
 		panic(e)
 	}
 	commitString := strings.Join(os.Args[2:], " ")
-	log.I.Ln("committing with commit string:", commitString)
 	e = runCmd("git", "commit", "-m"+commitString)
 	if log.E.Chk(e) {
 		panic(e)
@@ -214,10 +213,11 @@ func Version() string {
 }
 
 func runCmd(cmd ...string) (err error) {
+
 	c := exec.Command(cmd[0], cmd[1:]...)
 	var output []byte
 	output, err = c.CombinedOutput()
-	if err == nil {
+	if err == nil && err.Error() != "" {
 		log.I.Ln("\n", string(output))
 	}
 	return
