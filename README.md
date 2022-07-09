@@ -4,19 +4,19 @@ Process control, logging and child processes
 
 ## Description
 
-Golang is a great language for concurrency, but sometimes you want parallelism, and it's often simpler to design apps 
-as little units that plug together via RPC APIs. Services don't always have easy start/stop/reconfig/restart 
+Golang is a great language for concurrency, but sometimes you want parallelism, and it's often simpler to design apps
+as little units that plug together via RPC APIs. Services don't always have easy start/stop/reconfig/restart
 controls, and sometimes they use their own custom configuration scheme that is complicated to integrate with yours.
 
-In addition, you may want to design your applications as neat little pieces, but how to attach them together and 
+In addition, you may want to design your applications as neat little pieces, but how to attach them together and
 orchestrate them starting up and coming down cleanly, and not have to deal with several different ttys to get the logs.
 
-Proc creates a simple framework for creating observable, controllable execution units out of your code, and more 
+Proc creates a simple framework for creating observable, controllable execution units out of your code, and more
 easily integrating the code of others.
 
-This project is the merge of several libraries for logging, spawning and controlling child processes, and creating 
-an RPC to child processes that controls the run of the child process. Due to the confusing duplication of signals as 
-a means of control and the lack of uniformity in signals (ie windows) the goal of `proc` is to create one way to do, 
+This project is the merge of several libraries for logging, spawning and controlling child processes, and creating
+an RPC to child processes that controls the run of the child process. Due to the confusing duplication of signals as
+a means of control and the lack of uniformity in signals (ie windows) the goal of `proc` is to create one way to do,
 following the principles of design used for Go itself.
 
 ## Badges
@@ -27,8 +27,15 @@ following the principles of design used for Go itself.
 
 ### For developers:
 
-To bump patch version and make a commit, install the program in [bumper/](./bumper), run with the commit string 
-after the command. To install:
+To make nice tagged versions with the version number in the commit as well as matching to the tag, there is a tool
+called [bumper](./bumper) that bumps the version to the next patch version (vX.X.PATCH), embeds this new version
+number into [version.go](./version.go) with the matching corresponding git commit hash. This will make importing
+this library at an exact commit much more human.
+
+In addition, it makes it easy to make a nice multi line commit message as many repositories request in their 
+CONTRIBUTION file by replacing ` -- ` with two carriage returns.
+
+To install:
 
     go install ./bumper/.
 
