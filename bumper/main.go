@@ -190,7 +190,7 @@ func Version() string {
 	if log.E.Chk(e) {
 		panic(e)
 	}
-	commitString := strings.Join(os.Args[2:], " ")
+	commitString := strings.Join(os.Args[1:], " ")
 
 	commitString = strings.ReplaceAll(commitString, " -- ", "\n\n")
 
