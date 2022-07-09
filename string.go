@@ -6,22 +6,32 @@ import (
 	"go.uber.org/atomic"
 )
 
-type String struct {
+type _str struct {
 	value atomic.String
-	Meta
+	*metadata
 }
 
-func (s *String) FromString(st string) error {
+func NewString(m *metadata) (b *_str) {
+	b = &_str{}
+	err := b.FromString(m.Default())
+	if err != nil {
+		panic(err)
+	}
+	b.metadata = m
+	return
+}
+
+func (s *_str) FromString(st string) error {
 	s.value.Store(st)
 	return nil
 }
 
-func (s *String) Bool() bool              { panic("type error") }
-func (s *String) Int() int64              { panic("type error") }
-func (s *String) Duration() time.Duration { panic("type error") }
-func (s *String) Uint() uint64            { panic("type error") }
-func (s *String) Float() float64          { panic("type error") }
-func (s *String) String() string          { return s.value.Load() }
-func (s *String) List() []string          { panic("type error") }
+func (s *_str) Bool() bool              { panic("type error") }
+func (s *_str) Int() int64              { panic("type error") }
+func (s *_str) Duration() time.Duration { panic("type error") }
+func (s *_str) Uint() uint64            { panic("type error") }
+func (s *_str) Float() float64          { panic("type error") }
+func (s *_str) String() string          { return s.value.Load() }
+func (s *_str) List() []string          { panic("type error") }
 
-func (s *String) Set(st string) { s.value.Store(st) }
+func (s *_str) Set(st string) { s.value.Store(st) }

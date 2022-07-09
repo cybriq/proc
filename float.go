@@ -8,12 +8,22 @@ import (
 	"go.uber.org/atomic"
 )
 
-type Float struct {
+type _flt struct {
 	value atomic.Float64
-	Meta
+	*metadata
 }
 
-func (f *Float) FromString(s string) error {
+func NewFloat(m *metadata) (b *_flt) {
+	b = &_flt{}
+	err := b.FromString(m.Default())
+	if err != nil {
+		panic(err)
+	}
+	b.metadata = m
+	return
+}
+
+func (f *_flt) FromString(s string) error {
 	fl, err := strconv.ParseFloat(s, 64)
 	if err != nil {
 		return err
@@ -22,12 +32,12 @@ func (f *Float) FromString(s string) error {
 	return nil
 }
 
-func (f *Float) Bool() bool              { panic("type error") }
-func (f *Float) Int() int64              { panic("type error") }
-func (f *Float) Duration() time.Duration { panic("type error") }
-func (f *Float) Uint() uint64            { panic("type error") }
-func (f *Float) Float() float64          { return f.value.Load() }
-func (f *Float) String() string          { return fmt.Sprint(f.value.Load()) }
-func (f *Float) List() []string          { panic("type error") }
+func (f *_flt) Bool() bool              { panic("type error") }
+func (f *_flt) Int() int64              { panic("type error") }
+func (f *_flt) Duration() time.Duration { panic("type error") }
+func (f *_flt) Uint() uint64            { panic("type error") }
+func (f *_flt) Float() float64          { return f.value.Load() }
+func (f *_flt) String() string          { return fmt.Sprint(f.value.Load()) }
+func (f *_flt) List() []string          { panic("type error") }
 
-func (f *Float) Set(fl float64) { f.value.Store(fl) }
+func (f *_flt) Set(fl float64) { f.value.Store(fl) }

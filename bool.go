@@ -9,12 +9,22 @@ import (
 	"go.uber.org/atomic"
 )
 
-type Bool struct {
+type _bool struct {
 	value atomic.Bool
-	Meta
+	*metadata
 }
 
-func (b *Bool) FromString(s string) error {
+func NewBool(m *metadata) (b *_bool) {
+	b = &_bool{}
+	err := b.FromString(m.Default())
+	if err != nil {
+		panic(err)
+	}
+	b.metadata = m
+	return
+}
+
+func (b *_bool) FromString(s string) error {
 	asRunes := []rune(s)
 	first := string(asRunes[0])
 	first = strings.ToLower(first)
@@ -29,12 +39,12 @@ func (b *Bool) FromString(s string) error {
 	return nil
 }
 
-func (b *Bool) Bool() bool              { return b.value.Load() }
-func (b *Bool) Int() int64              { panic("type error") }
-func (d *Bool) Duration() time.Duration { panic("type error") }
-func (b *Bool) Uint() uint64            { panic("type error") }
-func (b *Bool) Float() float64          { panic("type error") }
-func (b *Bool) String() string          { return fmt.Sprint(b.value.Load()) }
-func (b *Bool) List() []string          { panic("type error") }
+func (b *_bool) Bool() bool              { return b.value.Load() }
+func (b *_bool) Int() int64              { panic("type error") }
+func (b *_bool) Duration() time.Duration { panic("type error") }
+func (b *_bool) Uint() uint64            { panic("type error") }
+func (b *_bool) Float() float64          { panic("type error") }
+func (b *_bool) String() string          { return fmt.Sprint(b.value.Load()) }
+func (b *_bool) List() []string          { panic("type error") }
 
-func (b *Bool) Set(bo bool) { b.value.Store(bo) }
+func (b *_bool) Set(bo bool) { b.value.Store(bo) }
