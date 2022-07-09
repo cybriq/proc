@@ -3,6 +3,7 @@ package proc
 import (
 	"strings"
 	"sync"
+	"time"
 )
 
 type List struct {
@@ -17,10 +18,11 @@ func (l *List) FromString(s string) error {
 	l.Set(split)
 	return nil
 }
-func (l *List) Bool() bool     { panic("type error") }
-func (l *List) Int() int64     { panic("type error") }
-func (l *List) Uint() uint64   { panic("type error") }
-func (l *List) Float() float64 { panic("type error") }
+func (l *List) Bool() bool              { panic("type error") }
+func (l *List) Int() int64              { panic("type error") }
+func (l *List) Duration() time.Duration { panic("type error") }
+func (l *List) Uint() uint64            { panic("type error") }
+func (l *List) Float() float64          { panic("type error") }
 
 func (l *List) String() (o string) {
 	o = "["

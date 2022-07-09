@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"go.uber.org/atomic"
 )
@@ -28,11 +29,12 @@ func (b *Bool) FromString(s string) error {
 	return nil
 }
 
-func (b *Bool) Bool() bool     { return b.value.Load() }
-func (b *Bool) Int() int64     { panic("type error") }
-func (b *Bool) Uint() uint64   { panic("type error") }
-func (b *Bool) Float() float64 { panic("type error") }
-func (b *Bool) String() string { return fmt.Sprint(b.value.Load()) }
-func (b *Bool) List() []string { panic("type error") }
+func (b *Bool) Bool() bool              { return b.value.Load() }
+func (b *Bool) Int() int64              { panic("type error") }
+func (d *Bool) Duration() time.Duration { panic("type error") }
+func (b *Bool) Uint() uint64            { panic("type error") }
+func (b *Bool) Float() float64          { panic("type error") }
+func (b *Bool) String() string          { return fmt.Sprint(b.value.Load()) }
+func (b *Bool) List() []string          { panic("type error") }
 
 func (b *Bool) Set(bo bool) { b.value.Store(bo) }

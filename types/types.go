@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 const (
 	Bool int = iota
 	Int
@@ -17,6 +19,7 @@ var Names = []string{"Bool", "Int", "Uint", "Float", "String", "List"}
 type Concrete interface {
 	Bool() bool
 	Int() int64
+	Duration() time.Duration
 	Uint() uint64
 	Float() float64
 	String() string
