@@ -3,9 +3,9 @@ module gitlab.com/cybriqsystems/proc
 go 1.18
 
 require (
-	github.com/cybriq/log v0.0.6
 	github.com/davecgh/go-spew v1.1.1
 	github.com/gookit/color v1.5.1
+	go.uber.org/atomic v1.9.0
 	gopkg.in/src-d/go-git.v4 v4.13.1
 )
 

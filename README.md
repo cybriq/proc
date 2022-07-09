@@ -33,6 +33,9 @@ reasonably include in the README.
 
 ## Roadmap
 
+- [x] Implement basic logger
+- [ ] Create concurrent safe configuration CLI/env/config system
+
 ## Contributing
 
 ## Authors and acknowledgment
