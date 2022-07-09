@@ -27,19 +27,13 @@ var (
 )
 
 func main() {
-	var bump bool
-	if len(os.Args) > 1 {
-		if os.Args[1] == "bump" {
-			if len(os.Args) < 3 {
-				panic(
-					"if bumping version please add commit comment after" +
-						" bump keyword",
-				)
-			}
-			bump = true
-		}
+	if len(os.Args) < 2 {
+		fmt.Fprintln(
+			os.Stderr,
+			"arguments required in order to bump and push this repo",
+		)
+		os.Exit(1)
 	}
-
 	proc.App = "version updater"
 	BuildTime = time.Now().Format(time.RFC3339)
 	var cwd string
@@ -94,8 +88,6 @@ func main() {
 		return
 	}
 	var maxVersion int
-	var maxString string
-	var maxIs bool
 	if e = rt.ForEach(
 		func(pr *plumbing.Reference) (e error) {
 			s := strings.Split(pr.String(), "/")
@@ -112,14 +104,9 @@ func main() {
 				vn := va[0]*1000000 + va[1]*1000 + va[2]
 				if maxVersion < vn {
 					maxVersion = vn
-					maxString = prs
 					Major = va[0]
 					Minor = va[1]
 					Patch = va[2]
-				}
-				if pr.Hash() == rh.Hash() {
-					maxIs = true
-					return
 				}
 			}
 			return
@@ -128,18 +115,12 @@ func main() {
 		fmt.Println(e)
 		return
 	}
-	if bump {
-		Patch++
-		maxString = fmt.Sprintf("v%d.%d.%d", Major, Minor, Patch)
-	}
-	if !maxIs {
-		maxString += "+"
-	}
-	SemVer = maxString
+	// Bump to next patch version every time
+	Patch++
+	// Update SemVer
+	SemVer = fmt.Sprintf("v%d.%d.%d", Major, Minor, Patch)
 	PathBase = tr.Filesystem.Root() + "/"
 	versionFile := `package proc
-
-` + `//go:generate go run ./version/.
 
 import (
 	"fmt"
@@ -205,31 +186,29 @@ func Version() string {
 		"\tMinor:", Minor, "\n",
 		"\tPatch:", Patch, "\n",
 	)
-	if bump {
-		e = runCmd("git", "add", ".")
-		if log.E.Chk(e) {
-			panic(e)
-		}
-		commitString := strings.Join(os.Args[2:], " ")
-		log.I.Ln("committing with commit string:", commitString)
-		e = runCmd("git", "commit", "-m"+commitString)
-		if log.E.Chk(e) {
-			panic(e)
-		}
-		e = runCmd("git", "tag", SemVer)
-		if log.E.Chk(e) {
-			panic(e)
-		}
-		gr := strings.Split(GitRef, "/")
-		branch := gr[2]
-		e = runCmd("git", "push", "origin", branch)
-		if log.E.Chk(e) {
-			panic(e)
-		}
-		e = runCmd("git", "push", "origin", SemVer)
-		if log.E.Chk(e) {
-			panic(e)
-		}
+	e = runCmd("git", "add", ".")
+	if log.E.Chk(e) {
+		panic(e)
+	}
+	commitString := strings.Join(os.Args[2:], " ")
+	log.I.Ln("committing with commit string:", commitString)
+	e = runCmd("git", "commit", "-m"+commitString)
+	if log.E.Chk(e) {
+		panic(e)
+	}
+	e = runCmd("git", "tag", SemVer)
+	if log.E.Chk(e) {
+		panic(e)
+	}
+	gr := strings.Split(GitRef, "/")
+	branch := gr[2]
+	e = runCmd("git", "push", "origin", branch)
+	if log.E.Chk(e) {
+		panic(e)
+	}
+	e = runCmd("git", "push", "origin", SemVer)
+	if log.E.Chk(e) {
+		panic(e)
 	}
 	return
 }

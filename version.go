@@ -1,7 +1,5 @@
 package proc
 
-//go:generate go run ./version/.
-
 import (
 	"fmt"
 )
@@ -12,11 +10,11 @@ var (
 	// GitRef is the gitref, as in refs/heads/branchname
 	GitRef = "refs/heads/master"
 	// GitCommit is the commit hash of the current HEAD
-	GitCommit = "e07a4aa63c5332f63a8a17999fa77875a63f600e"
+	GitCommit = "cd22498b4086ebbcf90ecbe26ec84f364ef84b1b"
 	// BuildTime stores the time when the current binary was built
-	BuildTime = "2022-07-09T16:51:04+03:00"
+	BuildTime = "2022-07-09T17:22:57+03:00"
 	// SemVer lists the (latest) git tag on the build
-	SemVer = "v0.0.12"
+	SemVer = "v0.0.13"
 	// PathBase is the path base returned from runtime caller
 	PathBase = "/home/davidvennik/src/gitlab.com/cybriqsystems/proc/"
 	// Major is the major number from the tag
@@ -24,7 +22,7 @@ var (
 	// Minor is the minor number from the tag
 	Minor = 0
 	// Patch is the patch version number from the tag
-	Patch = 12
+	Patch = 13
 )
 
 // Version returns a pretty printed version information string
