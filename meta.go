@@ -3,6 +3,8 @@ package proc
 import (
 	"strings"
 	"sync"
+
+	"gitlab.com/cybriqsystems/proc/types"
 )
 
 // metadata automatically implements everything except the inputs and outputs
@@ -18,19 +20,9 @@ type Desc struct {
 	Tags, Aliases                                          []string
 }
 
-var Types = []string{
-	"bool",
-	"duration",
-	"float",
-	"int",
-	"list",
-	"string",
-	"uint",
-}
-
 func isType(s string) (is bool) {
-	for i := range Types {
-		if s == Types[i] {
+	for i := range types.Names {
+		if s == types.Names[i] {
 			is = true
 		}
 	}
