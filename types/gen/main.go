@@ -40,11 +40,13 @@ func main() {
 
 import "time"
 
+type Type int
+
 const (
 `
 	for i := range Types {
 		if i == 0 {
-			o += fmt.Sprintf("\t%s = iota\n", Types[i].name)
+			o += fmt.Sprintf("\t%s Type = iota\n", Types[i].name)
 		} else {
 			o += fmt.Sprintf("\t%s\n", Types[i].name)
 		}
@@ -60,7 +62,7 @@ var Names = []string{
 	o += `}
 
 // Concrete should return a value for the correct concrete type and panic
-// otherwise, except for String which should always yield a value
+// otherwise, except for String which should always yield a value.
 type Concrete interface {
 `
 	for i := range Types {
@@ -69,7 +71,6 @@ type Concrete interface {
 
 	o += `}
 `
-	fmt.Println(o)
 	err := ioutil.WriteFile("names.go", []byte(o), 0600)
 	if err != nil {
 		panic(err)

@@ -4,8 +4,10 @@ package types
 
 import "time"
 
+type Type int
+
 const (
-	Bool = iota
+	Bool Type = iota
 	Int
 	Uint
 	Duration
@@ -26,7 +28,7 @@ var Names = []string{
 }
 
 // Concrete should return a value for the correct concrete type and panic
-// otherwise, except for String which should always yield a value
+// otherwise, except for String which should always yield a value.
 type Concrete interface {
 	Bool() bool
 	Int() int64

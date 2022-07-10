@@ -25,7 +25,7 @@ func NewList(m *metadata) (b *_lst) {
 // FromString converts a comma separated list of strings into a _lst
 func (l *_lst) FromString(s string) error {
 	split := strings.Split(s, ",")
-	l.Set(split)
+	l.Set(split...)
 	return nil
 }
 func (l *_lst) Bool() bool              { panic("type error") }
@@ -52,9 +52,14 @@ func (l *_lst) List() (li []string) {
 	return
 }
 
-func (l *_lst) Set(li []string) {
+func (l *_lst) Set(li ...string) {
 	l.Mutex.Lock()
 	l.value = make([]string, len(li))
 	copy(l.value, li)
 	l.Mutex.Unlock()
+}
+
+// List is a more compact way of declaring a []string
+func List(items ...string) []string {
+	return items
 }

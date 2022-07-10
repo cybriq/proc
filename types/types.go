@@ -1,9 +1,9 @@
 package types
 
-// Type represents a variable
-type Type interface {
+// Item represents a variable
+type Item interface {
 	Name() string
-	Type() string
+	Type() Type
 	Aliases() []string
 	Group() string
 	Tags() []string
@@ -12,4 +12,8 @@ type Type interface {
 	Default() string
 	FromString(string) error
 	Concrete
+}
+
+func Name(T Type) string {
+	return Names[T]
 }

@@ -10,14 +10,16 @@ import (
 // metadata automatically implements everything except the inputs and outputs
 type metadata struct {
 	sync.Mutex
-	name, typ, group, description, documentation, def string
-	tags, aliases                                     []string
+	name, group, description, documentation, def string
+	typ                                          types.Type
+	tags, aliases                                []string
 }
 
 // Desc is the named field form of metadata for generating a metadata
 type Desc struct {
-	Name, Type, Group, Description, Documentation, Default string
-	Tags, Aliases                                          []string
+	Name, Group, Description, Documentation, Default string
+	Type                                             types.Type
+	Tags, Aliases                                    []string
 }
 
 func isType(s string) (is bool) {
@@ -33,12 +35,8 @@ func isType(s string) (is bool) {
 // struct literal.
 //
 // name, type, group and tags all will be canonicalized to lower case.
-// Type must be valid or function will panic
+// Item must be valid or function will panic
 func New(args Desc) *metadata {
-	typ := strings.ToLower(args.Type)
-	if !isType(typ) {
-		panic("invalid type: '" + typ + "'")
-	}
 	// tags should be all lower case
 	for i := range args.Tags {
 		args.Tags[i] = strings.ToLower(args.Tags[i])
@@ -46,7 +44,7 @@ func New(args Desc) *metadata {
 	// name, type and group should also be lower case
 	return &metadata{
 		name:          strings.ToLower(args.Name),
-		typ:           typ,
+		typ:           args.Type,
 		aliases:       args.Aliases,
 		group:         strings.ToLower(args.Group),
 		tags:          args.Tags,
@@ -61,7 +59,7 @@ func (m *metadata) Name() string {
 	defer m.Unlock()
 	return m.name
 }
-func (m *metadata) Type() string {
+func (m *metadata) Type() types.Type {
 	m.Lock()
 	defer m.Unlock()
 	return m.typ

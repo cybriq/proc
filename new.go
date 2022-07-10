@@ -1,25 +1,29 @@
 package proc
 
-import "gitlab.com/cybriqsystems/proc/types"
+import (
+	"fmt"
 
-func Item(m *metadata) (t types.Type) {
+	"gitlab.com/cybriqsystems/proc/types"
+)
+
+func Item(m *metadata) (t types.Item) {
 	switch m.Type() {
-	case "bool":
+	case types.Bool:
 		t = NewBool(m)
-	case "duration":
+	case types.Duration:
 		t = NewDuration(m)
-	case "float":
+	case types.Float:
 		t = NewFloat(m)
-	case "int":
+	case types.Int:
 		t = NewInt(m)
-	case "list":
+	case types.List:
 		t = NewList(m)
-	case "string":
+	case types.String:
 		t = NewString(m)
-	case "uint":
+	case types.Uint:
 		t = NewUint(m)
 	default:
-		panic("invalid type: '" + m.Type() + "'")
+		panic("invalid type: '" + fmt.Sprint(m.Type()) + "'")
 	}
 	return
 }
