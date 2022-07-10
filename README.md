@@ -28,7 +28,7 @@ following the principles of design used for Go itself.
 ### For developers:
 
 To make nice tagged versions with the version number in the commit as well as matching to the tag, there is a tool
-called [bumper](./bumper) that bumps the version to the next patch version (vX.X.PATCH), embeds this new version
+called [bumper](cmd/bumper) that bumps the version to the next patch version (vX.X.PATCH), embeds this new version
 number into [version.go](./version.go) with the matching corresponding git commit hash. This will make importing
 this library at an exact commit much more human.
 

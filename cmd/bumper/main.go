@@ -34,7 +34,7 @@ func main() {
 		)
 		os.Exit(1)
 	}
-	proc.App = "version updater"
+	proc.App = "bumper"
 	BuildTime = time.Now().Format(time.RFC3339)
 	var cwd string
 	var e error
