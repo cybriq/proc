@@ -45,6 +45,7 @@ func (c *Configs) Get(name string) (t types.Item, err error) {
 
 func (c *Configs) MarshalJSON() ([]byte, error) {
 	out := make(map[string]interface{}, len(c.items))
+	c.Lock()
 	for i := range c.items {
 		switch c.items[i].Type() {
 		case types.Bool:
@@ -69,6 +70,7 @@ func (c *Configs) MarshalJSON() ([]byte, error) {
 			out[i] = c.items[i].List()
 		}
 	}
+	c.Unlock()
 	b, err := json.MarshalIndent(out, "", "\t")
 	return b, err
 }
@@ -85,37 +87,37 @@ func (c *Configs) UnmarshalJSON(bytes []byte) error {
 		}
 		switch v.Type() {
 		case types.Bool:
-			t := c.items[i].(*_bool)
+			t := c.items[i].(*BoolT)
 			ta := &t
 			(*ta).Set(v.Bool())
 
 		case types.Int:
-			t := c.items[i].(*_int)
+			t := c.items[i].(*IntT)
 			ta := &t
 			(*ta).Set(v.Int())
 
 		case types.Uint:
-			t := c.items[i].(*_uin)
+			t := c.items[i].(*UinT)
 			ta := &t
 			(*ta).Set(v.Uint())
 
 		case types.Duration:
-			t := c.items[i].(*_dur)
+			t := c.items[i].(*DurT)
 			ta := &t
 			(*ta).Set(v.Duration())
 
 		case types.Float:
-			t := c.items[i].(*_flt)
+			t := c.items[i].(*FltT)
 			ta := &t
 			(*ta).Set(v.Float())
 
 		case types.String:
-			t := c.items[i].(*_str)
+			t := c.items[i].(*StrT)
 			ta := &t
 			(*ta).Set(v.String())
 
 		case types.List:
-			t := c.items[i].(*_lst)
+			t := c.items[i].(*LstT)
 			ta := &t
 			(*ta).Set(v.List()...)
 		}
@@ -123,15 +125,15 @@ func (c *Configs) UnmarshalJSON(bytes []byte) error {
 	return err
 }
 
-type _bool struct {
+type BoolT struct {
 	value atomic.Bool
 	*metadata
 }
 
-var _ types.Item = &_bool{}
+var _ types.Item = &BoolT{}
 
-func NewBool(m *metadata) (b *_bool) {
-	b = &_bool{}
+func NewBool(m *metadata) (b *BoolT) {
+	b = &BoolT{}
 	err := b.FromString(m.Default())
 	if err != nil {
 		panic(err)
@@ -140,7 +142,7 @@ func NewBool(m *metadata) (b *_bool) {
 	return
 }
 
-func (b *_bool) FromString(s string) error {
+func (b *BoolT) FromString(s string) error {
 	asRunes := []rune(s)
 	first := string(asRunes[0])
 	first = strings.ToLower(first)
@@ -155,25 +157,25 @@ func (b *_bool) FromString(s string) error {
 	return nil
 }
 
-func (b _bool) Bool() bool              { return b.value.Load() }
-func (b _bool) Int() int64              { panic("type error") }
-func (b _bool) Duration() time.Duration { panic("type error") }
-func (b _bool) Uint() uint64            { panic("type error") }
-func (b _bool) Float() float64          { panic("type error") }
-func (b _bool) String() string          { return fmt.Sprint(b.value.Load()) }
-func (b _bool) List() []string          { panic("type error") }
+func (b BoolT) Bool() bool              { return b.value.Load() }
+func (b BoolT) Int() int64              { panic("type error") }
+func (b BoolT) Duration() time.Duration { panic("type error") }
+func (b BoolT) Uint() uint64            { panic("type error") }
+func (b BoolT) Float() float64          { panic("type error") }
+func (b BoolT) String() string          { return fmt.Sprint(b.value.Load()) }
+func (b BoolT) List() []string          { panic("type error") }
 
-func (b *_bool) Set(bo bool) { b.value.Store(bo) }
+func (b *BoolT) Set(bo bool) { b.value.Store(bo) }
 
-type _dur struct {
+type DurT struct {
 	value atomic.Duration
 	*metadata
 }
 
-var _ types.Item = &_dur{}
+var _ types.Item = &DurT{}
 
-func NewDuration(m *metadata) (b *_dur) {
-	b = &_dur{}
+func NewDuration(m *metadata) (b *DurT) {
+	b = &DurT{}
 	err := b.FromString(m.Default())
 	if err != nil {
 		panic(err)
@@ -182,7 +184,7 @@ func NewDuration(m *metadata) (b *_dur) {
 	return
 }
 
-func (d *_dur) FromString(s string) error {
+func (d *DurT) FromString(s string) error {
 	i, err := time.ParseDuration(s)
 	if err != nil {
 		return err
@@ -191,25 +193,25 @@ func (d *_dur) FromString(s string) error {
 	return nil
 }
 
-func (d _dur) Bool() bool              { panic("type error") }
-func (d _dur) Int() int64              { return int64(d.value.Load()) }
-func (d _dur) Duration() time.Duration { return d.value.Load() }
-func (d _dur) Uint() uint64            { panic("type error") }
-func (d _dur) Float() float64          { panic("type error") }
-func (d _dur) String() string          { return fmt.Sprint(d.value.Load()) }
-func (d _dur) List() []string          { panic("type error") }
+func (d DurT) Bool() bool              { panic("type error") }
+func (d DurT) Int() int64              { return int64(d.value.Load()) }
+func (d DurT) Duration() time.Duration { return d.value.Load() }
+func (d DurT) Uint() uint64            { panic("type error") }
+func (d DurT) Float() float64          { panic("type error") }
+func (d DurT) String() string          { return fmt.Sprint(d.value.Load()) }
+func (d DurT) List() []string          { panic("type error") }
 
-func (d *_dur) Set(du time.Duration) { d.value.Store(du) }
+func (d *DurT) Set(du time.Duration) { d.value.Store(du) }
 
-type _flt struct {
+type FltT struct {
 	value atomic.Float64
 	*metadata
 }
 
-var _ types.Item = &_flt{}
+var _ types.Item = &FltT{}
 
-func NewFloat(m *metadata) (b *_flt) {
-	b = &_flt{}
+func NewFloat(m *metadata) (b *FltT) {
+	b = &FltT{}
 	err := b.FromString(m.Default())
 	if err != nil {
 		panic(err)
@@ -218,7 +220,7 @@ func NewFloat(m *metadata) (b *_flt) {
 	return
 }
 
-func (f *_flt) FromString(s string) error {
+func (f *FltT) FromString(s string) error {
 	fl, err := strconv.ParseFloat(s, 64)
 	if err != nil {
 		return err
@@ -227,25 +229,25 @@ func (f *_flt) FromString(s string) error {
 	return nil
 }
 
-func (f _flt) Bool() bool              { panic("type error") }
-func (f _flt) Int() int64              { panic("type error") }
-func (f _flt) Duration() time.Duration { panic("type error") }
-func (f _flt) Uint() uint64            { panic("type error") }
-func (f _flt) Float() float64          { return f.value.Load() }
-func (f _flt) String() string          { return fmt.Sprint(f.value.Load()) }
-func (f _flt) List() []string          { panic("type error") }
+func (f FltT) Bool() bool              { panic("type error") }
+func (f FltT) Int() int64              { panic("type error") }
+func (f FltT) Duration() time.Duration { panic("type error") }
+func (f FltT) Uint() uint64            { panic("type error") }
+func (f FltT) Float() float64          { return f.value.Load() }
+func (f FltT) String() string          { return fmt.Sprint(f.value.Load()) }
+func (f FltT) List() []string          { panic("type error") }
 
-func (f *_flt) Set(fl float64) { f.value.Store(fl) }
+func (f *FltT) Set(fl float64) { f.value.Store(fl) }
 
-type _int struct {
+type IntT struct {
 	value atomic.Int64
 	*metadata
 }
 
-var _ types.Item = &_int{}
+var _ types.Item = &IntT{}
 
-func NewInt(m *metadata) (b *_int) {
-	b = &_int{}
+func NewInt(m *metadata) (b *IntT) {
+	b = &IntT{}
 	err := b.FromString(m.Default())
 	if err != nil {
 		panic(err)
@@ -254,7 +256,7 @@ func NewInt(m *metadata) (b *_int) {
 	return
 }
 
-func (in *_int) FromString(s string) error {
+func (in *IntT) FromString(s string) error {
 	i, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
 		return err
@@ -263,26 +265,26 @@ func (in *_int) FromString(s string) error {
 	return nil
 }
 
-func (in _int) Bool() bool              { panic("type error") }
-func (in _int) Int() int64              { return in.value.Load() }
-func (in _int) Duration() time.Duration { panic("type error") }
-func (in _int) Uint() uint64            { panic("type error") }
-func (in _int) Float() float64          { panic("type error") }
-func (in _int) String() string          { return fmt.Sprint(in.value.Load()) }
-func (in _int) List() []string          { panic("type error") }
+func (in IntT) Bool() bool              { panic("type error") }
+func (in IntT) Int() int64              { return in.value.Load() }
+func (in IntT) Duration() time.Duration { panic("type error") }
+func (in IntT) Uint() uint64            { panic("type error") }
+func (in IntT) Float() float64          { panic("type error") }
+func (in IntT) String() string          { return fmt.Sprint(in.value.Load()) }
+func (in IntT) List() []string          { panic("type error") }
 
-func (in *_int) Set(i int64) { in.value.Store(int64(i)) }
+func (in *IntT) Set(i int64) { in.value.Store(int64(i)) }
 
-type _lst struct {
+type LstT struct {
 	value []string
 	*sync.Mutex
 	*metadata
 }
 
-var _ types.Item = &_lst{}
+var _ types.Item = &LstT{}
 
-func NewList(m *metadata) (b *_lst) {
-	b = &_lst{Mutex: &sync.Mutex{}}
+func NewList(m *metadata) (b *LstT) {
+	b = &LstT{Mutex: &sync.Mutex{}}
 	err := b.FromString(m.Default())
 	if err != nil {
 		panic(err)
@@ -292,7 +294,7 @@ func NewList(m *metadata) (b *_lst) {
 }
 
 // FromString converts a comma separated list of strings into a _lst
-func (l *_lst) FromString(s string) error {
+func (l *LstT) FromString(s string) error {
 	split := strings.Split(s, ",")
 	for i := range split {
 		if !strings.HasPrefix(split[i], "\"") || !strings.HasPrefix(
@@ -306,23 +308,24 @@ func (l *_lst) FromString(s string) error {
 	l.Set(split...)
 	return nil
 }
-func (l _lst) Bool() bool              { panic("type error") }
-func (l _lst) Int() int64              { panic("type error") }
-func (l _lst) Duration() time.Duration { panic("type error") }
-func (l _lst) Uint() uint64            { panic("type error") }
-func (l _lst) Float() float64          { panic("type error") }
+func (l LstT) Bool() bool              { panic("type error") }
+func (l LstT) Int() int64              { panic("type error") }
+func (l LstT) Duration() time.Duration { panic("type error") }
+func (l LstT) Uint() uint64            { panic("type error") }
+func (l LstT) Float() float64          { panic("type error") }
 
-func (l _lst) String() (o string) {
-	o = "["
+func (l LstT) String() (o string) {
 	lo := l.List()
 	for i := range lo {
-		o += "\"" + lo[i] + "\","
+		o += "\"" + lo[i]
+		if i != len(lo)-1 {
+			o += "\","
+		}
 	}
-	o += "]"
 	return
 }
 
-func (l _lst) List() (li []string) {
+func (l LstT) List() (li []string) {
 	l.Mutex.Lock()
 	li = make([]string, len(l.value))
 	copy(li, l.value)
@@ -330,7 +333,7 @@ func (l _lst) List() (li []string) {
 	return
 }
 
-func (l *_lst) Set(li ...string) {
+func (l *LstT) Set(li ...string) {
 	l.Mutex.Lock()
 	l.value = make([]string, len(li))
 	copy(l.value, li)
@@ -342,15 +345,15 @@ func List(items ...string) []string {
 	return items
 }
 
-type _str struct {
+type StrT struct {
 	value atomic.String
 	*metadata
 }
 
-var _ types.Item = &_str{}
+var _ types.Item = &StrT{}
 
-func NewString(m *metadata) (b *_str) {
-	b = &_str{}
+func NewString(m *metadata) (b *StrT) {
+	b = &StrT{}
 	err := b.FromString(m.Default())
 	if err != nil {
 		panic(err)
@@ -359,30 +362,30 @@ func NewString(m *metadata) (b *_str) {
 	return
 }
 
-func (s *_str) FromString(st string) error {
+func (s *StrT) FromString(st string) error {
 	s.value.Store(st)
 	return nil
 }
 
-func (s _str) Bool() bool              { panic("type error") }
-func (s _str) Int() int64              { panic("type error") }
-func (s _str) Duration() time.Duration { panic("type error") }
-func (s _str) Uint() uint64            { panic("type error") }
-func (s _str) Float() float64          { panic("type error") }
-func (s _str) String() string          { return s.value.Load() }
-func (s _str) List() []string          { panic("type error") }
+func (s StrT) Bool() bool              { panic("type error") }
+func (s StrT) Int() int64              { panic("type error") }
+func (s StrT) Duration() time.Duration { panic("type error") }
+func (s StrT) Uint() uint64            { panic("type error") }
+func (s StrT) Float() float64          { panic("type error") }
+func (s StrT) String() string          { return s.value.Load() }
+func (s StrT) List() []string          { panic("type error") }
 
-func (s *_str) Set(st string) { s.value.Store(st) }
+func (s *StrT) Set(st string) { s.value.Store(st) }
 
-type _uin struct {
+type UinT struct {
 	value atomic.Uint64
 	*metadata
 }
 
-var _ types.Item = &_uin{}
+var _ types.Item = &UinT{}
 
-func NewUint(m *metadata) (b *_uin) {
-	b = &_uin{}
+func NewUint(m *metadata) (b *UinT) {
+	b = &UinT{}
 	err := b.FromString(m.Default())
 	if err != nil {
 		panic(err)
@@ -391,7 +394,7 @@ func NewUint(m *metadata) (b *_uin) {
 	return
 }
 
-func (u *_uin) FromString(s string) error {
+func (u *UinT) FromString(s string) error {
 	i, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
 		return err
@@ -400,15 +403,15 @@ func (u *_uin) FromString(s string) error {
 	return nil
 }
 
-func (u _uin) Bool() bool              { panic("type error") }
-func (u _uin) Int() int64              { panic("type error") }
-func (u _uin) Duration() time.Duration { panic("type error") }
-func (u _uin) Uint() uint64            { return u.value.Load() }
-func (u _uin) Float() float64          { panic("type error") }
-func (u _uin) String() string          { return fmt.Sprint(u.value.Load()) }
-func (u _uin) List() []string          { panic("type error") }
+func (u UinT) Bool() bool              { panic("type error") }
+func (u UinT) Int() int64              { panic("type error") }
+func (u UinT) Duration() time.Duration { panic("type error") }
+func (u UinT) Uint() uint64            { return u.value.Load() }
+func (u UinT) Float() float64          { panic("type error") }
+func (u UinT) String() string          { return fmt.Sprint(u.value.Load()) }
+func (u UinT) List() []string          { panic("type error") }
 
-func (u *_uin) Set(ui uint64) { u.value.Store(ui) }
+func (u *UinT) Set(ui uint64) { u.value.Store(ui) }
 
 // metadata automatically implements everything except the inputs and outputs
 type metadata struct {
