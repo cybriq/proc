@@ -53,8 +53,21 @@ reasonably include in the README.
 
 ## Roadmap
 
-- [x] Implement basic logger
-- [ ] Create concurrent safe configuration CLI/env/config system
+- [x] Implement basic logger v0.0.x
+- [ ] Create concurrent safe configuration CLI/env/config system v0.1.x
+  - [x] Created types with mutex/atomic locks to prevent concurrent access
+  - [x] Created key value map type containing collections of concurrent safe values with concurrent safe access to 
+    members
+  - [x] Created tests for generating and concurrently accessing/mutating data
+  - [ ] Created application directory and load configuration from file (using json, with all values stored in file, 
+    no unnecessary comments)
+  - [ ] Read values from environment variables overlay on config file values
+  - [ ] Created command line parsing system overlay values above previous
+- [ ] Child process control system v0.2.x
+  - [ ] Launch, pause, continue and stop child process. Use only one method: the IPC API, no complication with signals.
+  - [ ] Read and pass through logging from child process
+  - [ ] Correctly handle process signals from OS/tty to trigger orderly shutdown of child processes and leave none 
+    orphaned
 
 ## Contributing
 
