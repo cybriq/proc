@@ -37,4 +37,5 @@ type Concrete interface {
 	Float() float64
 	String() string
 	List() []string
+	FromString(string) error
 }
