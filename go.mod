@@ -1,4 +1,4 @@
-module gitlab.com/cybriqsystems/proc
+module github.com/cybriq/proc
 
 go 1.18
 
