@@ -18,11 +18,10 @@ import (
 var (
 	URL                 string
 	GitRef              string
-	GitCommit           string
+	ParentGitCommit     string
 	BuildTime           string
 	SemVer              string
 	Major, Minor, Patch int
-	Meta                string
 	PathBase            string
 )
 
@@ -81,7 +80,7 @@ func main() {
 	}
 	rhs := rh.Strings()
 	GitRef = rhs[0]
-	GitCommit = rhs[1]
+	ParentGitCommit = rhs[1]
 	var rt storer.ReferenceIter
 	if rt, e = repo.Tags(); log.E.Chk(e) {
 		fmt.Println(e)
@@ -163,7 +162,7 @@ func Version() string {
 		versionFile,
 		URL,
 		GitRef,
-		GitCommit,
+		ParentGitCommit,
 		BuildTime,
 		SemVer,
 		PathBase,
@@ -179,7 +178,7 @@ func Version() string {
 		"\nRepository Information\n",
 		"\tGit repository: "+URL+"\n",
 		"\tBranch: "+GitRef+"\n",
-		"\tCommit: "+GitCommit+"\n",
+		"\tCommit: "+ParentGitCommit+"\n",
 		"\tBuilt: "+BuildTime+"\n",
 		"\tSemVer: "+SemVer+"\n",
 		"\tMajor:", Major, "\n",
