@@ -131,8 +131,8 @@ var (
 	URL = "%s"
 	// GitRef is the gitref, as in refs/heads/branchname
 	GitRef = "%s"
-	// GitCommit is the commit hash of the current HEAD
-	GitCommit = "%s"
+	// ParentGitCommit is the commit hash of the parent HEAD
+	ParentGitCommit = "%s"
 	// BuildTime stores the time when the current binary was built
 	BuildTime = "%s"
 	// SemVer lists the (latest) git tag on the build
@@ -153,7 +153,7 @@ func Version() string {
 		"\nRepository Information\n",
 		"\tGit repository: "+URL+"\n",
 		"\tBranch: "+GitRef+"\n",
-		"\tCommit: "+GitCommit+"\n",
+		"\tCommit: "+ParentGitCommit+"\n",
 		"\tBuilt: "+BuildTime+"\n",
 		"\tSemVer: "+SemVer+"\n",
 	)
