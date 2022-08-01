@@ -45,6 +45,8 @@ To use:
         hyphen will be separated by a carriage return -- \
         anywhere in the text
 
+To automatically bump the minor version use `minor` as the first word of the comment. For the major version `major`.
+
 ## Usage
 
 reasonably include in the README.

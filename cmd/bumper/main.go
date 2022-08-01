@@ -36,9 +36,11 @@ func main() {
 	var minor, major bool
 	if os.Args[1] == "minor" {
 		minor = true
+		os.Args = append(os.Args[0:1], os.Args[2:]...)
 	}
 	if os.Args[1] == "major" {
 		major = true
+		os.Args = append(os.Args[0:1], os.Args[2:]...)
 	}
 	proc.App = "bumper"
 	BuildTime = time.Now().Format(time.RFC3339)
