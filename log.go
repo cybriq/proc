@@ -14,6 +14,8 @@ import (
 	"github.com/gookit/color"
 )
 
+var log = GetLogger(PathBase)
+
 type LogLevel int32
 
 const (

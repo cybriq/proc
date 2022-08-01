@@ -1,6 +1,7 @@
 package proc
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -11,6 +12,116 @@ import (
 	"github.com/cybriq/proc/types"
 	"go.uber.org/atomic"
 )
+
+type Configs struct {
+	items map[string]types.Item
+	sync.Mutex
+}
+
+func Create(items ...Desc) (c Configs) {
+	c = Configs{items: make(map[string]types.Item)}
+	c.Lock()
+	defer c.Unlock()
+	for i := range items {
+		name := items[i].Name
+		if _, ok := c.items[name]; ok {
+			panic("configs contains a duplicate named item: '" + name + "'")
+		}
+		c.items[name] = Item(New(items[i]))
+	}
+	return
+}
+
+func (c *Configs) Get(name string) (t types.Item, err error) {
+	var ok bool
+	c.Lock()
+	t, ok = c.items[name]
+	c.Unlock()
+	if !ok {
+		err = fmt.Errorf("type '%s' not found", name)
+	}
+	return
+}
+
+func (c *Configs) MarshalJSON() ([]byte, error) {
+	out := make(map[string]interface{}, len(c.items))
+	for i := range c.items {
+		switch c.items[i].Type() {
+		case types.Bool:
+			out[i] = c.items[i].Bool()
+
+		case types.Int:
+			out[i] = c.items[i].Int()
+
+		case types.Uint:
+			out[i] = c.items[i].Uint()
+
+		case types.Duration:
+			out[i] = c.items[i].Duration()
+
+		case types.Float:
+			out[i] = c.items[i].Float()
+
+		case types.String:
+			out[i] = c.items[i].String()
+
+		case types.List:
+			out[i] = c.items[i].List()
+		}
+	}
+	b, err := json.MarshalIndent(out, "", "\t")
+	return b, err
+}
+
+func (c *Configs) UnmarshalJSON(bytes []byte) error {
+	in := make(map[string]interface{})
+	err := json.Unmarshal(bytes, &in)
+	for i := range in {
+		v, ok := c.items[i]
+		if !ok {
+			return fmt.Errorf(
+				"configuration does not contain item with"+
+					" name %s", i)
+		}
+		switch v.Type() {
+		case types.Bool:
+			t := c.items[i].(*_bool)
+			ta := &t
+			(*ta).Set(v.Bool())
+
+		case types.Int:
+			t := c.items[i].(*_int)
+			ta := &t
+			(*ta).Set(v.Int())
+
+		case types.Uint:
+			t := c.items[i].(*_uin)
+			ta := &t
+			(*ta).Set(v.Uint())
+
+		case types.Duration:
+			t := c.items[i].(*_dur)
+			ta := &t
+			(*ta).Set(v.Duration())
+
+		case types.Float:
+			t := c.items[i].(*_flt)
+			ta := &t
+			(*ta).Set(v.Float())
+
+		case types.String:
+			t := c.items[i].(*_str)
+			ta := &t
+			(*ta).Set(v.String())
+
+		case types.List:
+			t := c.items[i].(*_lst)
+			ta := &t
+			(*ta).Set(v.List()...)
+		}
+	}
+	return err
+}
 
 type _bool struct {
 	value atomic.Bool
@@ -298,3 +409,112 @@ func (u _uin) String() string          { return fmt.Sprint(u.value.Load()) }
 func (u _uin) List() []string          { panic("type error") }
 
 func (u *_uin) Set(ui uint64) { u.value.Store(ui) }
+
+// metadata automatically implements everything except the inputs and outputs
+type metadata struct {
+	sync.Mutex
+	name, group, description, documentation, def string
+	typ                                          types.Type
+	tags, aliases                                []string
+}
+
+// Desc is the named field form of metadata for generating a metadata
+type Desc struct {
+	Name, Group, Description, Documentation, Default string
+	Type                                             types.Type
+	Tags, Aliases                                    []string
+}
+
+func isType(s string) (is bool) {
+	for i := range types.Names {
+		if s == types.Names[i] {
+			is = true
+		}
+	}
+	return
+}
+
+// New allows you to create a metadata with a sparsely filled, named field
+// struct literal.
+//
+// name, type, group and tags all will be canonicalized to lower case.
+func New(args Desc) *metadata {
+	// tags should be all lower case
+	for i := range args.Tags {
+		args.Tags[i] = strings.ToLower(args.Tags[i])
+	}
+	// name, type and group should also be lower case
+	return &metadata{
+		name:          strings.ToLower(args.Name),
+		typ:           args.Type,
+		aliases:       args.Aliases,
+		group:         strings.ToLower(args.Group),
+		tags:          args.Tags,
+		description:   args.Description,
+		documentation: args.Documentation,
+		def:           args.Default,
+	}
+}
+
+func (m *metadata) Name() string {
+	m.Lock()
+	defer m.Unlock()
+	return m.name
+}
+func (m *metadata) Type() types.Type {
+	m.Lock()
+	defer m.Unlock()
+	return m.typ
+}
+func (m *metadata) Aliases() []string {
+	m.Lock()
+	defer m.Unlock()
+	return m.aliases
+}
+func (m *metadata) Group() string {
+	m.Lock()
+	defer m.Unlock()
+	return m.group
+}
+func (m *metadata) Tags() []string {
+	m.Lock()
+	defer m.Unlock()
+	return m.tags
+}
+func (m *metadata) Description() string {
+	m.Lock()
+	defer m.Unlock()
+	return m.description
+}
+func (m *metadata) Documentation() string {
+	m.Lock()
+	defer m.Unlock()
+	return m.documentation
+}
+func (m *metadata) Default() string {
+	m.Lock()
+	defer m.Unlock()
+	return m.def
+}
+
+func Item(m *metadata) (t types.Item) {
+	switch m.Type() {
+	case types.Bool:
+		t = NewBool(m)
+	case types.Duration:
+		t = NewDuration(m)
+	case types.Float:
+		t = NewFloat(m)
+	case types.Int:
+		t = NewInt(m)
+	case types.List:
+		t = NewList(m)
+	case types.String:
+		t = NewString(m)
+	case types.Uint:
+		t = NewUint(m)
+	default:
+		panic("invalid type: '" + fmt.Sprint(m.Type()) + "'")
+	}
+	return
+}
