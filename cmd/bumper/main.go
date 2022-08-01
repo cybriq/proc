@@ -186,10 +186,6 @@ func Version() string {
 		Minor,
 		Patch,
 	)
-	if major || minor {
-		log.I.Ln("\n" + versionFileOut)
-		os.Exit(0)
-	}
 	path := filepath.Join(PathBase, "version.go")
 	if e = ioutil.WriteFile(path, []byte(versionFileOut), 0666); log.E.Chk(e) {
 		fmt.Println(e)
