@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"gitlab.com/cybriqsystems/proc/types"
+	"github.com/cybriq/proc/types"
 )
 
 type Configs struct {

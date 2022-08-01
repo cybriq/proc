@@ -3,7 +3,7 @@ package proc
 import (
 	"fmt"
 
-	"gitlab.com/cybriqsystems/proc/types"
+	"github.com/cybriq/proc/types"
 )
 
 func Item(m *metadata) (t types.Item) {

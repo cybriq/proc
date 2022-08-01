@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gitlab.com/cybriqsystems/proc"
+	"github.com/cybriq/proc"
 )
 
 var log = proc.GetLogger(proc.PathBase)

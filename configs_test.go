@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	// Normally dots are bad but for a spec this makes sense
-	. "gitlab.com/cybriqsystems/proc"
+	. "github.com/cybriq/proc"
 	// T is a common symbol for Type in Go
-	T "gitlab.com/cybriqsystems/proc/types"
+	T "github.com/cybriq/proc/types"
 )
 
 var log = GetLogger(PathBase)

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"sync"
 
-	"gitlab.com/cybriqsystems/proc/types"
+	"github.com/cybriq/proc/types"
 )
 
 // metadata automatically implements everything except the inputs and outputs

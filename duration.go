@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"gitlab.com/cybriqsystems/proc/types"
+	"github.com/cybriq/proc/types"
 	"go.uber.org/atomic"
 )
 

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"gitlab.com/cybriqsystems/proc/types"
+	"github.com/cybriq/proc/types"
 )
 
 type _lst struct {
