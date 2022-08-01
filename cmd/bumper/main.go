@@ -152,7 +152,7 @@ func Version() string {
 		"\nRepository Information\n",
 		"\tGit repository: "+URL+"\n",
 		"\tBranch: "+GitRef+"\n",
-		"\tCommit: "+ParentGitCommit+"\n",
+		"\tPacethGitCommit: "+ParentGitCommit+"\n",
 		"\tBuilt: "+BuildTime+"\n",
 		"\tSemVer: "+SemVer+"\n",
 	)
@@ -178,7 +178,7 @@ func Version() string {
 		"\nRepository Information\n",
 		"\tGit repository: "+URL+"\n",
 		"\tBranch: "+GitRef+"\n",
-		"\tCommit: "+ParentGitCommit+"\n",
+		"\tParentGitCommit: "+ParentGitCommit+"\n",
 		"\tBuilt: "+BuildTime+"\n",
 		"\tSemVer: "+SemVer+"\n",
 		"\tMajor:", Major, "\n",
