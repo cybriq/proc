@@ -33,6 +33,13 @@ func main() {
 		)
 		os.Exit(1)
 	}
+	var minor, major bool
+	if os.Args[1] == "minor" {
+		minor = true
+	}
+	if os.Args[1] == "major" {
+		major = true
+	}
 	proc.App = "bumper"
 	BuildTime = time.Now().Format(time.RFC3339)
 	var cwd string
@@ -116,6 +123,15 @@ func main() {
 	}
 	// Bump to next patch version every time
 	Patch++
+	if minor {
+		Minor++
+		Patch = 0
+	}
+	if major {
+		Major++
+		Minor = 0
+		Patch = 0
+	}
 	// Update SemVer
 	SemVer = fmt.Sprintf("v%d.%d.%d", Major, Minor, Patch)
 	PathBase = tr.Filesystem.Root() + "/"
@@ -170,6 +186,10 @@ func Version() string {
 		Minor,
 		Patch,
 	)
+	if major || minor {
+		log.I.Ln("\n" + versionFileOut)
+		os.Exit(0)
+	}
 	path := filepath.Join(PathBase, "version.go")
 	if e = ioutil.WriteFile(path, []byte(versionFileOut), 0666); log.E.Chk(e) {
 		fmt.Println(e)
