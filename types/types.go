@@ -10,7 +10,6 @@ type Item interface {
 	Description() string
 	Documentation() string
 	Default() string
-	FromString(string) error
 	Concrete
 }
 

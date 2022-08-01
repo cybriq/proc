@@ -1,19 +1,24 @@
 package proc
 
 import (
+	"errors"
 	"strings"
 	"sync"
 	"time"
+
+	"gitlab.com/cybriqsystems/proc/types"
 )
 
 type _lst struct {
 	value []string
-	sync.Mutex
+	*sync.Mutex
 	*metadata
 }
 
+var _ types.Item = &_lst{}
+
 func NewList(m *metadata) (b *_lst) {
-	b = &_lst{}
+	b = &_lst{Mutex: &sync.Mutex{}}
 	err := b.FromString(m.Default())
 	if err != nil {
 		panic(err)
@@ -25,16 +30,25 @@ func NewList(m *metadata) (b *_lst) {
 // FromString converts a comma separated list of strings into a _lst
 func (l *_lst) FromString(s string) error {
 	split := strings.Split(s, ",")
+	for i := range split {
+		if !strings.HasPrefix(split[i], "\"") || !strings.HasPrefix(
+			split[i], "\"") {
+			return errors.New(
+				"list items must be enclosed in double quotes" +
+					" and cannot contain commas")
+		}
+		split[i] = split[i][1 : len(split[i])-1]
+	}
 	l.Set(split...)
 	return nil
 }
-func (l *_lst) Bool() bool              { panic("type error") }
-func (l *_lst) Int() int64              { panic("type error") }
-func (l *_lst) Duration() time.Duration { panic("type error") }
-func (l *_lst) Uint() uint64            { panic("type error") }
-func (l *_lst) Float() float64          { panic("type error") }
+func (l _lst) Bool() bool              { panic("type error") }
+func (l _lst) Int() int64              { panic("type error") }
+func (l _lst) Duration() time.Duration { panic("type error") }
+func (l _lst) Uint() uint64            { panic("type error") }
+func (l _lst) Float() float64          { panic("type error") }
 
-func (l *_lst) String() (o string) {
+func (l _lst) String() (o string) {
 	o = "["
 	lo := l.List()
 	for i := range lo {
@@ -44,7 +58,7 @@ func (l *_lst) String() (o string) {
 	return
 }
 
-func (l *_lst) List() (li []string) {
+func (l _lst) List() (li []string) {
 	l.Mutex.Lock()
 	li = make([]string, len(l.value))
 	copy(li, l.value)

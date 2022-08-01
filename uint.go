@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"gitlab.com/cybriqsystems/proc/types"
 	"go.uber.org/atomic"
 )
 
@@ -12,6 +13,8 @@ type _uin struct {
 	value atomic.Uint64
 	*metadata
 }
+
+var _ types.Item = &_uin{}
 
 func NewUint(m *metadata) (b *_uin) {
 	b = &_uin{}
@@ -32,12 +35,12 @@ func (u *_uin) FromString(s string) error {
 	return nil
 }
 
-func (u *_uin) Bool() bool              { panic("type error") }
-func (u *_uin) Int() int64              { panic("type error") }
-func (u *_uin) Duration() time.Duration { panic("type error") }
-func (u *_uin) Uint() uint64            { return u.value.Load() }
-func (u *_uin) Float() float64          { panic("type error") }
-func (u *_uin) String() string          { return fmt.Sprint(u.value.Load()) }
-func (u *_uin) List() []string          { panic("type error") }
+func (u _uin) Bool() bool              { panic("type error") }
+func (u _uin) Int() int64              { panic("type error") }
+func (u _uin) Duration() time.Duration { panic("type error") }
+func (u _uin) Uint() uint64            { return u.value.Load() }
+func (u _uin) Float() float64          { panic("type error") }
+func (u _uin) String() string          { return fmt.Sprint(u.value.Load()) }
+func (u _uin) List() []string          { panic("type error") }
 
-func (u *_uin) Set(ui int) { u.value.Store(uint64(ui)) }
+func (u *_uin) Set(ui uint64) { u.value.Store(ui) }

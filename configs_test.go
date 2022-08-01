@@ -9,6 +9,8 @@ import (
 	T "gitlab.com/cybriqsystems/proc/types"
 )
 
+var log = GetLogger(PathBase)
+
 func TestCreate(t *testing.T) {
 	cfgs := Create(
 		Desc{
@@ -28,6 +30,116 @@ And several paragraphs
 			Tags:    List("tag1", "tag2"),
 			Aliases: List("BF"),
 		},
+		Desc{
+			Name:        "intflag",
+			Type:        T.Int,
+			Group:       "group",
+			Description: "this is a description",
+			Documentation: `This is documentation.
+
+With many lines of text.
+
+And several paragraphs
+
+- even some sort of markup
+`,
+			Default: "-42",
+			Tags:    List("tag1", "tag2"),
+			Aliases: List("BF"),
+		},
+		Desc{
+			Name:        "uintflag",
+			Type:        T.Uint,
+			Group:       "group",
+			Description: "this is a description",
+			Documentation: `This is documentation.
+
+With many lines of text.
+
+And several paragraphs
+
+- even some sort of markup
+`,
+			Default: "322",
+			Tags:    List("tag1", "tag2"),
+			Aliases: List("BF"),
+		},
+		Desc{
+			Name:        "durationflag",
+			Type:        T.Duration,
+			Group:       "group",
+			Description: "this is a description",
+			Documentation: `This is documentation.
+
+With many lines of text.
+
+And several paragraphs
+
+- even some sort of markup
+`,
+			Default: "1h2m3s",
+			Tags:    List("tag1", "tag2"),
+			Aliases: List("BF"),
+		},
+		Desc{
+			Name:        "floatflag",
+			Type:        T.Float,
+			Group:       "group",
+			Description: "this is a description",
+			Documentation: `This is documentation.
+
+With many lines of text.
+
+And several paragraphs
+
+- even some sort of markup
+`,
+			Default: "3.1415927",
+			Tags:    List("tag1", "tag2", "tag3"),
+			Aliases: List("BF"),
+		},
+		Desc{
+			Name:        "stringflag",
+			Type:        T.String,
+			Group:       "group",
+			Description: "this is a description",
+			Documentation: `This is documentation.
+
+With many lines of text.
+
+And several paragraphs
+
+- even some sort of markup
+`,
+			Default: "itsame",
+			Tags:    List("tag1"),
+			Aliases: List("BF"),
+		},
+		Desc{
+			Name:        "listflag",
+			Type:        T.List,
+			Group:       "group",
+			Description: "this is a description",
+			Documentation: `This is documentation.
+
+With many lines of text.
+
+And several paragraphs
+
+- even some sort of markup
+`,
+			Default: `"links","two","three","four"`,
+			Tags:    List("tag1", "tag2"),
+			Aliases: List("BF"),
+		},
 	)
-	_ = cfgs
+	j, err := cfgs.MarshalJSON()
+	if err != nil {
+		t.Fail()
+	}
+	log.I.Ln("\n", string(j))
+	err = cfgs.UnmarshalJSON(j)
+	if err != nil {
+		t.Fail()
+	}
 }

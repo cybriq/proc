@@ -35,7 +35,6 @@ func isType(s string) (is bool) {
 // struct literal.
 //
 // name, type, group and tags all will be canonicalized to lower case.
-// Item must be valid or function will panic
 func New(args Desc) *metadata {
 	// tags should be all lower case
 	for i := range args.Tags {
