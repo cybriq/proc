@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 )
 
+// Pair is a set of type names and their actual implementation type
 type Pair struct{ name, typ string }
 
 // Types is the list of names and concrete primitive types they represent
@@ -36,12 +37,15 @@ func main() {
 
 	o := `package types
 
+// This file is generated: DO NOT EDIT.
 //go:generate go run ./gen/main.go
 
 import "time"
 
+// Type is an identifier code for a type of configuration item.
 type Type int
 
+// The list of types.Item supported by proc
 const (
 `
 	for i := range Types {

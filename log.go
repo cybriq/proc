@@ -14,10 +14,16 @@ import (
 	"github.com/gookit/color"
 )
 
+// log is your generic Logger creation invocation that uses the version data
+// in version.go that provides the current compilation path prefix for making
+// relative paths for log printing code locations.
 var log = GetLogger(PathBase)
 
+// LogLevel is a code representing a scale of importance and context for log
+// entries.
 type LogLevel int32
 
+// The LogLevel settings used in proc
 const (
 	Off LogLevel = iota
 	Fatal
@@ -29,6 +35,8 @@ const (
 	Trace
 )
 
+// LvlStr is a map that provides the uniform width strings that are printed
+// to identify the LogLevel of a log entry.
 var LvlStr = map[LogLevel]string{
 	Off:   "off  ",
 	Fatal: "fatal",
@@ -73,16 +81,21 @@ type (
 		Chk Chk
 	}
 
+	// LevelSpec is a key pair of log level and the text colorizer used
+	// for it.
 	LevelSpec struct {
 		Name      string
 		Colorizer func(format string, a ...interface{}) string
 	}
 
+	// Logger is a set of log printers for the various LogLevel items.
 	Logger struct {
 		F, E, W, I, D, T LevelPrinter
 	}
 )
 
+// gLS is a helper to make more compact declarations of LevelSpec names and
+// colors by using the LogLevel LvlStr map.
 func gLS(lvl LogLevel, r, g, b byte) LevelSpec {
 	return LevelSpec{
 		Name:      LvlStr[lvl],
@@ -106,10 +119,11 @@ var (
 	tty, file io.Writer = os.Stderr, nil
 	writer              = tty
 	logLevel            = Trace
-	// App is the name of the application
+	// App is the name of the application. Change this at the beginning of
+	// an application main.
 	App = "  main"
 	// AllSubsystems stores all of the package subsystem names found in the current
-	// application
+	// application.
 	AllSubsystems []string
 )
 
@@ -159,18 +173,22 @@ func GetLoc(skip int, subsystem string) (output string) {
 	return
 }
 
+// timeStampFormat is a custom time format that provides millisecond precision.
 var timeStampFormat = "2006-01-02T15:04:05.000000Z07:00"
 
+// SetTimeStampFormat sets a custom timeStampFormat for the logger
 func SetTimeStampFormat(format string) {
 	timeStampFormat = format
 }
 
+// getTimeText is a helper that returns the current time with the
+// timeStampFormat that is configured.
 func getTimeText() string {
 	return time.Now().Format(timeStampFormat)
 }
 
-// joinStrings constructs a string from an slice of interface same as Println
-// but without the terminal newline
+// joinStrings constructs a string from a slice of interface same as Println but
+// without the terminal newline
 func joinStrings(sep string, a ...interface{}) func() (o string) {
 	return func() (o string) {
 		for i := range a {
@@ -183,6 +201,8 @@ func joinStrings(sep string, a ...interface{}) func() (o string) {
 	}
 }
 
+// logPrint is the generic log printing function that provides the base
+// format for log entries.
 func logPrint(
 	level LogLevel,
 	subsystem string,
@@ -248,12 +268,14 @@ func GetLogger(pathBase string) (l *Logger) {
 	}
 }
 
+// The collection of the different types of log print functions,
+// includes spew.Dump, closure and error check printers.
+
 func _ln(l LogLevel, ss string) Println {
 	return func(a ...interface{}) {
 		logPrint(l, ss, joinStrings(" ", a...))()
 	}
 }
-
 func _f(level LogLevel, subsystem string) Printf {
 	return func(format string, a ...interface{}) {
 		logPrint(
@@ -263,7 +285,6 @@ func _f(level LogLevel, subsystem string) Printf {
 		)()
 	}
 }
-
 func _s(level LogLevel, subsystem string) Prints {
 	return func(a ...interface{}) {
 		logPrint(
@@ -273,13 +294,11 @@ func _s(level LogLevel, subsystem string) Prints {
 		)()
 	}
 }
-
 func _c(level LogLevel, subsystem string) Printc {
 	return func(closure func() string) {
 		logPrint(level, subsystem, closure)()
 	}
 }
-
 func _chk(level LogLevel, subsystem string) Chk {
 	return func(e error) (is bool) {
 		if e != nil {

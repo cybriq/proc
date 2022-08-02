@@ -1,11 +1,14 @@
 package types
 
+// This file is generated: DO NOT EDIT.
 //go:generate go run ./gen/main.go
 
 import "time"
 
+// Type is an identifier code for a type of configuration item.
 type Type int
 
+// The list of types.Item supported by proc
 const (
 	Bool Type = iota
 	Int
@@ -37,5 +40,4 @@ type Concrete interface {
 	Float() float64
 	String() string
 	List() []string
-	FromString(string) error
 }

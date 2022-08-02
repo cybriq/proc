@@ -1,6 +1,7 @@
 package types
 
-// Item represents a variable
+// Item provides accessors for a Config item type's metadata and current
+// contents.
 type Item interface {
 	Name() string
 	Type() Type
@@ -13,6 +14,7 @@ type Item interface {
 	Concrete
 }
 
+// Name is a helper that returns the name associated with a Type.
 func Name(T Type) string {
 	return Names[T]
 }

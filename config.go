@@ -13,6 +13,7 @@ import (
 	"go.uber.org/atomic"
 )
 
+// Configs are a concurrent safe key value store for configuration items
 type Configs struct {
 	items map[string]types.Item
 	sync.Mutex
@@ -26,37 +27,45 @@ type Desc struct {
 }
 
 type (
+	// BooT is a boolean item type
 	BooT struct {
 		value atomic.Bool
 		*metadata
 	}
+	// DurT is a duration item type
 	DurT struct {
 		value atomic.Duration
 		*metadata
 	}
+	// FltT is a float64 item type
 	FltT struct {
 		value atomic.Float64
 		*metadata
 	}
+	// IntT is an int64 item type
 	IntT struct {
 		value atomic.Int64
 		*metadata
 	}
+	// LstT is a []string item type
 	LstT struct {
 		value []string
 		*sync.Mutex
 		*metadata
 	}
+	// StrT is a string item type
 	StrT struct {
 		value atomic.String
 		*metadata
 	}
+	// UinT is an uint64 item type
 	UinT struct {
 		value atomic.Uint64
 		*metadata
 	}
 )
 
+// Assert that all of the above types satisfy the types.Item interface
 var _ = []types.Item{
 	&BooT{},
 	&DurT{},
@@ -67,12 +76,16 @@ var _ = []types.Item{
 	&UinT{},
 }
 
+// metadata stores the information about the types.Item for documentation
+// purposes
 type metadata struct {
 	sync.Mutex
 	name, group, description, documentation, def string
 	typ                                          types.Type
 	tags, aliases                                []string
 }
+
+// Boolean item implementation
 
 func (b *BooT) FromString(s string) error {
 	asRunes := []rune(s)
@@ -88,18 +101,16 @@ func (b *BooT) FromString(s string) error {
 	}
 	return nil
 }
-
-func (b *BooT) Set(bo bool) { b.value.Store(bo) }
-
+func (b *BooT) Set(bo bool)            { b.value.Store(bo) }
 func (b BooT) Bool() bool              { return b.value.Load() }
 func (b BooT) Duration() time.Duration { panic("type error") }
 func (b BooT) Float() float64          { panic("type error") }
 func (b BooT) Int() int64              { panic("type error") }
 func (b BooT) List() []string          { panic("type error") }
+func (b BooT) String() string          { return fmt.Sprint(b.value.Load()) }
+func (b BooT) Uint() uint64            { panic("type error") }
 
-func (b BooT) String() string { return fmt.Sprint(b.value.Load()) }
-func (b BooT) Uint() uint64   { panic("type error") }
-
+// Get returns a named item from the Configs
 func (c *Configs) Get(name string) (t types.Item, err error) {
 	var ok bool
 	c.Lock()
@@ -111,6 +122,7 @@ func (c *Configs) Get(name string) (t types.Item, err error) {
 	return
 }
 
+// MarshalJSON returns the JSON for the current state of a Configs
 func (c *Configs) MarshalJSON() ([]byte, error) {
 	out := make(map[string]interface{}, len(c.items))
 	c.Lock()
@@ -143,6 +155,7 @@ func (c *Configs) MarshalJSON() ([]byte, error) {
 	return b, err
 }
 
+// UnmarshalJSON loads a Configs with the values in a JSON string
 func (c *Configs) UnmarshalJSON(bytes []byte) error {
 	in := make(map[string]interface{})
 	err := json.Unmarshal(bytes, &in)
@@ -193,6 +206,8 @@ func (c *Configs) UnmarshalJSON(bytes []byte) error {
 	return err
 }
 
+// Duration item implementation
+
 func (d *DurT) FromString(s string) error {
 	i, err := time.ParseDuration(s)
 	if err != nil {
@@ -209,6 +224,8 @@ func (d DurT) Int() int64              { return int64(d.value.Load()) }
 func (d DurT) List() []string          { panic("type error") }
 func (d DurT) String() string          { return fmt.Sprint(d.value.Load()) }
 func (d DurT) Uint() uint64            { panic("type error") }
+
+// Floating point item implementation
 
 func (f *FltT) FromString(s string) error {
 	fl, err := strconv.ParseFloat(s, 64)
@@ -243,6 +260,8 @@ func (in IntT) Int() int64              { return in.value.Load() }
 func (in IntT) List() []string          { panic("type error") }
 func (in IntT) String() string          { return fmt.Sprint(in.value.Load()) }
 func (in IntT) Uint() uint64            { panic("type error") }
+
+// List of strings item implementation
 
 func (l *LstT) FromString(s string) error {
 	split := strings.Split(s, ",")
@@ -287,6 +306,8 @@ func (l LstT) String() (o string) {
 }
 func (l LstT) Uint() uint64 { panic("type error") }
 
+// metadata accessors
+
 func (m *metadata) Aliases() []string {
 	m.Lock()
 	defer m.Unlock()
@@ -329,6 +350,8 @@ func (m *metadata) Type() types.Type {
 	return m.typ
 }
 
+// String item implementation
+
 func (s *StrT) FromString(st string) error {
 	s.value.Store(st)
 	return nil
@@ -359,6 +382,7 @@ func (u UinT) List() []string          { panic("type error") }
 func (u UinT) String() string          { return fmt.Sprint(u.value.Load()) }
 func (u UinT) Uint() uint64            { return u.value.Load() }
 
+// Create a new configuration from a slice of item Desc riptors.
 func Create(items ...Desc) (c Configs) {
 	c = Configs{items: make(map[string]types.Item)}
 	c.Lock()
@@ -373,6 +397,7 @@ func Create(items ...Desc) (c Configs) {
 	return
 }
 
+// Item takes a metadata and creates the appropriate item type for it.
 func Item(m *metadata) (t types.Item) {
 	switch m.Type() {
 	case types.Bool:
@@ -395,6 +420,7 @@ func Item(m *metadata) (t types.Item) {
 	return
 }
 
+// List is a helper that uses variadic parameters to return a slice of strings.
 func List(items ...string) []string {
 	return items
 }
@@ -421,12 +447,15 @@ func New(args Desc) *metadata {
 	}
 }
 
+// IfErrNotNilPanic is a helper for functions that should never error as
+// errors are purely programmer errors and not error conditions.
 func IfErrNotNilPanic(err error) {
 	if err != nil {
 		panic(err)
 	}
 }
 
+// NewBool creates a new boolean types.Item
 func NewBool(m *metadata) (b *BooT) {
 	b = &BooT{}
 	err := b.FromString(m.Default())
@@ -435,6 +464,7 @@ func NewBool(m *metadata) (b *BooT) {
 	return
 }
 
+// NewDuration creates a new duration types.Item
 func NewDuration(m *metadata) (b *DurT) {
 	b = &DurT{}
 	err := b.FromString(m.Default())
@@ -443,6 +473,7 @@ func NewDuration(m *metadata) (b *DurT) {
 	return
 }
 
+// NewFloat creates a new floating point types.Item
 func NewFloat(m *metadata) (b *FltT) {
 	b = &FltT{}
 	err := b.FromString(m.Default())
@@ -451,6 +482,7 @@ func NewFloat(m *metadata) (b *FltT) {
 	return
 }
 
+// NewInt creates a new integer types.Item
 func NewInt(m *metadata) (b *IntT) {
 	b = &IntT{}
 	err := b.FromString(m.Default())
@@ -459,6 +491,7 @@ func NewInt(m *metadata) (b *IntT) {
 	return
 }
 
+// NewList creates a new list of strings types.Item
 func NewList(m *metadata) (b *LstT) {
 	b = &LstT{Mutex: &sync.Mutex{}}
 	err := b.FromString(m.Default())
@@ -467,6 +500,7 @@ func NewList(m *metadata) (b *LstT) {
 	return
 }
 
+// NewString creates a new string types.Item
 func NewString(m *metadata) (b *StrT) {
 	b = &StrT{}
 	err := b.FromString(m.Default())
@@ -475,6 +509,7 @@ func NewString(m *metadata) (b *StrT) {
 	return
 }
 
+// NewUint creates a new unsigned integer types.Item
 func NewUint(m *metadata) (b *UinT) {
 	b = &UinT{}
 	err := b.FromString(m.Default())
