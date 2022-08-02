@@ -44,7 +44,7 @@ func readwrite(name string, wg sync.WaitGroup, cfgs *Configs,
 	switch item.Type() {
 	case types.Bool:
 		v := item.Bool()
-		item.(*BoolT).Set(!v)
+		item.(*BooT).Set(!v)
 		err = item.FromString(fmt.Sprint(!v))
 		if log.E.Chk(err) {
 			t.Fail()

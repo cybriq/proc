@@ -60,6 +60,7 @@ reasonably include in the README.
   - [x] Created types with mutex/atomic locks to prevent concurrent access
   - [x] Created key value map type containing collections of concurrent safe values with concurrent safe access to 
     members
+  - [x] Create JSON marshal/unmarshal for configuration collections
   - [x] Created tests for generating and concurrently accessing/mutating data
   - [ ] Created application directory and load configuration from file (using json, with all values stored in file, 
     no unnecessary comments)
