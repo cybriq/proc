@@ -1,7 +1,7 @@
 package types
 
 // Item provides accessors for a Config item type's metadata and current
-// contents.
+// contents, including a generic string format setter.
 type Item interface {
 	Name() string
 	Type() Type
@@ -11,6 +11,7 @@ type Item interface {
 	Description() string
 	Documentation() string
 	Default() string
+	FromString(string) error
 	Concrete
 }
 

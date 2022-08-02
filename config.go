@@ -122,6 +122,14 @@ func (c *Configs) Get(name string) (t types.Item, err error) {
 	return
 }
 
+func (c *Configs) Save(filename string) error {
+	return nil
+}
+
+func (c *Configs) Load(filename string) error {
+	return nil
+}
+
 // MarshalJSON returns the JSON for the current state of a Configs
 func (c *Configs) MarshalJSON() ([]byte, error) {
 	out := make(map[string]interface{}, len(c.items))
