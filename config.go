@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"strconv"
 	"strings"
 	"sync"
@@ -17,6 +18,7 @@ import (
 type Configs struct {
 	items map[string]types.Item
 	sync.Mutex
+	persistenceLock sync.Mutex
 }
 
 // Desc is the named field form of metadata for generating a metadata
@@ -122,12 +124,34 @@ func (c *Configs) Get(name string) (t types.Item, err error) {
 	return
 }
 
-func (c *Configs) Save(filename string) error {
-	return nil
+func (c *Configs) Save(filename string) (err error) {
+	var b []byte
+	c.persistenceLock.Lock()
+	defer c.persistenceLock.Unlock()
+	b, err = c.MarshalJSON()
+	if log.E.Chk(err) {
+		return
+	}
+	err = ioutil.WriteFile(filename, b, 0600)
+	if log.E.Chk(err) {
+		return
+	}
+	return
 }
 
-func (c *Configs) Load(filename string) error {
-	return nil
+func (c *Configs) Load(filename string) (err error) {
+	var b []byte
+	c.persistenceLock.Lock()
+	defer c.persistenceLock.Unlock()
+	b, err = ioutil.ReadFile(filename)
+	if log.E.Chk(err) {
+		return
+	}
+	err = c.UnmarshalJSON(b)
+	if log.E.Chk(err) {
+		return
+	}
+	return
 }
 
 // MarshalJSON returns the JSON for the current state of a Configs

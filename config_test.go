@@ -2,6 +2,8 @@ package proc
 
 import (
 	"fmt"
+	"math/rand"
+	"os"
 	"sync"
 	"testing"
 	"time"
@@ -10,11 +12,13 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	_ = createAndMarshalUnmarshal(t, &Configs{})
+	cfgs := createConfig(t, &Configs{})
+	_ = marshalUnmarshal(t, cfgs)
 }
 
 func TestConcurrency(t *testing.T) {
-	cfgs := createAndMarshalUnmarshal(t, &Configs{})
+	cfgs := createConfig(t, &Configs{})
+	_ = marshalUnmarshal(t, cfgs)
 	nameList := make([]string, len(descs))
 	for i := range descs {
 		nameList[i] = descs[i].Name
@@ -26,11 +30,37 @@ func TestConcurrency(t *testing.T) {
 		}
 	}
 	wg.Wait()
-	j, err := cfgs.MarshalJSON()
+	_ = marshalUnmarshal(t, cfgs)
+}
+
+func TestPersistence(t *testing.T) {
+	cfgs := createConfig(t, &Configs{})
+	b, err := cfgs.MarshalJSON()
 	if err != nil {
+		t.Log(err)
 		t.Fail()
 	}
-	log.I.Ln("\n", string(j))
+	s := string(b)
+	filename := "./test" + fmt.Sprint(rand.Int()) + ".json"
+	err = cfgs.Save(filename)
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	err = cfgs.Load(filename)
+	if err != nil {
+		t.Log(err)
+		t.Fail()
+	}
+	b, err = cfgs.MarshalJSON()
+	err = os.Remove(filename)
+	if err != nil {
+		t.Log("file '" + filename + "' not deleted")
+	}
+	if string(b) != s {
+		t.Log("written file does not match after being re-read")
+		t.Fail()
+	}
 }
 
 func readwrite(name string, wg sync.WaitGroup, cfgs *Configs,
@@ -223,8 +253,12 @@ And several paragraphs
 	},
 }
 
-func createAndMarshalUnmarshal(t *testing.T, cfgs *Configs) *Configs {
+func createConfig(t *testing.T, cfgs *Configs) *Configs {
 	*cfgs = Create(descs...)
+	return cfgs
+}
+
+func marshalUnmarshal(t *testing.T, cfgs *Configs) *Configs {
 	j, err := cfgs.MarshalJSON()
 	if err != nil {
 		t.Fail()

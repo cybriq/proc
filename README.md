@@ -62,7 +62,7 @@ reasonably include in the README.
     members
   - [x] Create JSON marshal/unmarshal for configuration collections
   - [x] Created tests for generating and concurrently accessing/mutating data
-  - [ ] Created application directory and load configuration from file (using json, with all values stored in file, 
+  - [x] Save and load configuration from file (using json, with all values stored in file, 
     no unnecessary comments)
   - [ ] Read values from environment variables overlay on config file values
   - [ ] Created command line parsing system overlay values above previous
