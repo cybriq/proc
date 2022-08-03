@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -21,49 +22,42 @@ type Configs struct {
 	persistenceLock sync.Mutex
 }
 
-// Desc is the named field form of metadata for generating a metadata
-type Desc struct {
-	Name, Group, Description, Documentation, Default string
-	Type                                             types.Type
-	Tags, Aliases                                    []string
-}
-
 type (
 	// BooT is a boolean item type
 	BooT struct {
 		value atomic.Bool
-		*metadata
+		*types.Metadata
 	}
 	// DurT is a duration item type
 	DurT struct {
 		value atomic.Duration
-		*metadata
+		*types.Metadata
 	}
 	// FltT is a float64 item type
 	FltT struct {
 		value atomic.Float64
-		*metadata
+		*types.Metadata
 	}
 	// IntT is an int64 item type
 	IntT struct {
 		value atomic.Int64
-		*metadata
+		*types.Metadata
 	}
 	// LstT is a []string item type
 	LstT struct {
 		value []string
 		*sync.Mutex
-		*metadata
+		*types.Metadata
 	}
 	// StrT is a string item type
 	StrT struct {
 		value atomic.String
-		*metadata
+		*types.Metadata
 	}
 	// UinT is an uint64 item type
 	UinT struct {
 		value atomic.Uint64
-		*metadata
+		*types.Metadata
 	}
 )
 
@@ -76,15 +70,6 @@ var _ = []types.Item{
 	&LstT{},
 	&StrT{},
 	&UinT{},
-}
-
-// metadata stores the information about the types.Item for documentation
-// purposes
-type metadata struct {
-	sync.Mutex
-	name, group, description, documentation, def string
-	typ                                          types.Type
-	tags, aliases                                []string
 }
 
 // Boolean item implementation
@@ -111,6 +96,7 @@ func (b BooT) Int() int64              { panic("type error") }
 func (b BooT) List() []string          { panic("type error") }
 func (b BooT) String() string          { return fmt.Sprint(b.value.Load()) }
 func (b BooT) Uint() uint64            { panic("type error") }
+func (b BooT) Meta() *types.Metadata   { return b.Metadata }
 
 // Get returns a named item from the Configs
 func (c *Configs) Get(name string) (t types.Item, err error) {
@@ -119,8 +105,68 @@ func (c *Configs) Get(name string) (t types.Item, err error) {
 	t, ok = c.items[name]
 	c.Unlock()
 	if !ok {
-		err = fmt.Errorf("type '%s' not found", name)
+		err = fmt.Errorf("item '%s' not found", name)
 	}
+	return
+}
+
+// GetAllNames returns a lexicographically sorted list of all item names in
+// the Configs.
+func (c *Configs) GetAllNames() (items []string) {
+
+	items = make([]string, len(c.items))
+	counter := 0
+	for i := range c.items {
+		// the Create function uses the Configs.Name field as map keys,
+		// so we don't need to interrogate further.
+		items[counter] = i
+	}
+	sort.Strings(items)
+	return
+}
+
+type help struct {
+	types.Metadata
+	detailed, markup bool
+}
+
+func toHelp() (h help) {
+	return
+}
+
+var helpTemplate = `
+{{.name}} ({{.type}})
+Aliases: <>
+Description: <>
+Documentation:
+<>
+Default: <>
+Tags: <>
+
+`
+
+func (c *Configs) GetHelp(name, group string, detailed,
+	markdown bool) (text string,
+	err error) {
+
+	if name == "" && group == "" {
+		allNames := c.GetAllNames()
+		var o string
+		for i := range allNames {
+			o, err = c.GetHelp(allNames[i], "", detailed, markdown)
+			if log.E.Chk(err) {
+				panic(err)
+			}
+			text += o
+		}
+	}
+	var item types.Item
+	item, err = c.Get(name)
+	if err != nil {
+		return
+	}
+	// construct the text
+	_ = item
 	return
 }
 
@@ -256,6 +302,7 @@ func (d DurT) Int() int64              { return int64(d.value.Load()) }
 func (d DurT) List() []string          { panic("type error") }
 func (d DurT) String() string          { return fmt.Sprint(d.value.Load()) }
 func (d DurT) Uint() uint64            { panic("type error") }
+func (d DurT) Meta() *types.Metadata   { return d.Metadata }
 
 // Floating point item implementation
 
@@ -275,6 +322,7 @@ func (f FltT) Int() int64              { panic("type error") }
 func (f FltT) List() []string          { panic("type error") }
 func (f FltT) String() string          { return fmt.Sprint(f.value.Load()) }
 func (f FltT) Uint() uint64            { panic("type error") }
+func (f FltT) Meta() *types.Metadata   { return f.Metadata }
 
 func (in *IntT) FromString(s string) error {
 	i, err := strconv.ParseInt(s, 10, 64)
@@ -292,6 +340,7 @@ func (in IntT) Int() int64              { return in.value.Load() }
 func (in IntT) List() []string          { panic("type error") }
 func (in IntT) String() string          { return fmt.Sprint(in.value.Load()) }
 func (in IntT) Uint() uint64            { panic("type error") }
+func (in IntT) Meta() *types.Metadata   { return in.Metadata }
 
 // List of strings item implementation
 
@@ -336,51 +385,8 @@ func (l LstT) String() (o string) {
 	}
 	return
 }
-func (l LstT) Uint() uint64 { panic("type error") }
-
-// metadata accessors
-
-func (m *metadata) Aliases() []string {
-	m.Lock()
-	defer m.Unlock()
-	return m.aliases
-}
-func (m *metadata) Default() string {
-	m.Lock()
-	defer m.Unlock()
-	return m.def
-}
-
-func (m *metadata) Description() string {
-	m.Lock()
-	defer m.Unlock()
-	return m.description
-}
-func (m *metadata) Documentation() string {
-	m.Lock()
-	defer m.Unlock()
-	return m.documentation
-}
-func (m *metadata) Group() string {
-	m.Lock()
-	defer m.Unlock()
-	return m.group
-}
-func (m *metadata) Name() string {
-	m.Lock()
-	defer m.Unlock()
-	return m.name
-}
-func (m *metadata) Tags() []string {
-	m.Lock()
-	defer m.Unlock()
-	return m.tags
-}
-func (m *metadata) Type() types.Type {
-	m.Lock()
-	defer m.Unlock()
-	return m.typ
-}
+func (l LstT) Uint() uint64          { panic("type error") }
+func (l LstT) Meta() *types.Metadata { return l.Metadata }
 
 // String item implementation
 
@@ -396,6 +402,7 @@ func (s StrT) Int() int64              { panic("type error") }
 func (s StrT) List() []string          { panic("type error") }
 func (s StrT) String() string          { return s.value.Load() }
 func (s StrT) Uint() uint64            { panic("type error") }
+func (s StrT) Meta() *types.Metadata   { return s.Metadata }
 
 func (u *UinT) FromString(s string) error {
 	i, err := strconv.ParseInt(s, 10, 64)
@@ -413,9 +420,10 @@ func (u UinT) Int() int64              { panic("type error") }
 func (u UinT) List() []string          { panic("type error") }
 func (u UinT) String() string          { return fmt.Sprint(u.value.Load()) }
 func (u UinT) Uint() uint64            { return u.value.Load() }
+func (u UinT) Meta() *types.Metadata   { return u.Metadata }
 
 // Create a new configuration from a slice of item Desc riptors.
-func Create(items ...Desc) (c Configs) {
+func Create(items ...types.Desc) (c Configs) {
 	c = Configs{items: make(map[string]types.Item)}
 	c.Lock()
 	defer c.Unlock()
@@ -424,13 +432,13 @@ func Create(items ...Desc) (c Configs) {
 		if _, ok := c.items[name]; ok {
 			panic("configs contains a duplicate named item: '" + name + "'")
 		}
-		c.items[name] = Item(New(items[i]))
+		c.items[name] = Item(types.New(items[i]))
 	}
 	return
 }
 
-// Item takes a metadata and creates the appropriate item type for it.
-func Item(m *metadata) (t types.Item) {
+// Item takes a Metadata and creates the appropriate item type for it.
+func Item(m *types.Metadata) (t types.Item) {
 	switch m.Type() {
 	case types.Bool:
 		t = NewBool(m)
@@ -457,28 +465,6 @@ func List(items ...string) []string {
 	return items
 }
 
-// New allows you to create a metadata with a sparsely filled, named field
-// struct literal.
-//
-// name, type, group and tags all will be canonicalized to lower case.
-func New(args Desc) *metadata {
-	// tags should be all lower case
-	for i := range args.Tags {
-		args.Tags[i] = strings.ToLower(args.Tags[i])
-	}
-	// name, type and group should also be lower case
-	return &metadata{
-		name:          strings.ToLower(args.Name),
-		typ:           args.Type,
-		aliases:       args.Aliases,
-		group:         strings.ToLower(args.Group),
-		tags:          args.Tags,
-		description:   args.Description,
-		documentation: args.Documentation,
-		def:           args.Default,
-	}
-}
-
 // IfErrNotNilPanic is a helper for functions that should never error as
 // errors are purely programmer errors and not error conditions.
 func IfErrNotNilPanic(err error) {
@@ -488,64 +474,64 @@ func IfErrNotNilPanic(err error) {
 }
 
 // NewBool creates a new boolean types.Item
-func NewBool(m *metadata) (b *BooT) {
+func NewBool(m *types.Metadata) (b *BooT) {
 	b = &BooT{}
 	err := b.FromString(m.Default())
 	IfErrNotNilPanic(err)
-	b.metadata = m
+	b.Metadata = m
 	return
 }
 
 // NewDuration creates a new duration types.Item
-func NewDuration(m *metadata) (b *DurT) {
+func NewDuration(m *types.Metadata) (b *DurT) {
 	b = &DurT{}
 	err := b.FromString(m.Default())
 	IfErrNotNilPanic(err)
-	b.metadata = m
+	b.Metadata = m
 	return
 }
 
 // NewFloat creates a new floating point types.Item
-func NewFloat(m *metadata) (b *FltT) {
+func NewFloat(m *types.Metadata) (b *FltT) {
 	b = &FltT{}
 	err := b.FromString(m.Default())
 	IfErrNotNilPanic(err)
-	b.metadata = m
+	b.Metadata = m
 	return
 }
 
 // NewInt creates a new integer types.Item
-func NewInt(m *metadata) (b *IntT) {
+func NewInt(m *types.Metadata) (b *IntT) {
 	b = &IntT{}
 	err := b.FromString(m.Default())
 	IfErrNotNilPanic(err)
-	b.metadata = m
+	b.Metadata = m
 	return
 }
 
 // NewList creates a new list of strings types.Item
-func NewList(m *metadata) (b *LstT) {
+func NewList(m *types.Metadata) (b *LstT) {
 	b = &LstT{Mutex: &sync.Mutex{}}
 	err := b.FromString(m.Default())
 	IfErrNotNilPanic(err)
-	b.metadata = m
+	b.Metadata = m
 	return
 }
 
 // NewString creates a new string types.Item
-func NewString(m *metadata) (b *StrT) {
+func NewString(m *types.Metadata) (b *StrT) {
 	b = &StrT{}
 	err := b.FromString(m.Default())
 	IfErrNotNilPanic(err)
-	b.metadata = m
+	b.Metadata = m
 	return
 }
 
 // NewUint creates a new unsigned integer types.Item
-func NewUint(m *metadata) (b *UinT) {
+func NewUint(m *types.Metadata) (b *UinT) {
 	b = &UinT{}
 	err := b.FromString(m.Default())
 	IfErrNotNilPanic(err)
-	b.metadata = m
+	b.Metadata = m
 	return
 }

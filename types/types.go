@@ -12,6 +12,7 @@ type Item interface {
 	Documentation() string
 	Default() string
 	FromString(string) error
+	Meta() *Metadata
 	Concrete
 }
 

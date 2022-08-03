@@ -19,6 +19,10 @@ const (
 	List
 )
 
+func (t Type) String() string {
+	return Names[t]
+}
+
 // Names provides the string associated with the Concrete type.
 var Names = []string{
 	"Bool",

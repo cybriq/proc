@@ -64,6 +64,7 @@ reasonably include in the README.
   - [x] Created tests for generating and concurrently accessing/mutating data
   - [x] Save and load configuration from file (using json, with all values stored in file, 
     no unnecessary comments)
+  - [ ] Generate CLI help texts from configs specifications
   - [ ] Read values from environment variables overlay on config file values
   - [ ] Created command line parsing system overlay values above previous
 - [ ] Child process control system v0.2.x
