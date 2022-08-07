@@ -74,6 +74,16 @@ func TestConfigs_GetHelp(t *testing.T) {
 	// 	panic(err)
 	// }
 	t.Log("\n" + text)
+	text, _ = cfgs.GetHelp("", "group1", true)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	t.Log("\n" + text)
+	text, _ = cfgs.GetHelp("stringflag", "", true)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	t.Log("\n" + text)
 }
 
 func readwrite(group, name string, wg *sync.WaitGroup, cfgs *Configs,

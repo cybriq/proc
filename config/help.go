@@ -24,19 +24,36 @@ const helpTemplate = `
 func (c *Configs) GetHelp(name, group string, detailed bool) (text string,
 	err error) {
 
+	tmpl, _ := template.New("help").Parse(helpTemplate)
 	var buf []byte
 	b := bytes.NewBuffer(buf)
 	switch {
 	case name == "" && group == "":
 		g := help{c.GetGroups(), detailed}
-		tmpl, _ := template.New("help").Parse(helpTemplate)
 		err := tmpl.Execute(b, g)
 		if log.E.Chk(err) {
 			return "", err
 		}
 		text = b.String()
+
 	case name == "" && group != "":
-	case name != "" && group == "":
+		g := help{TypesGrouped{c.GetGroup(group)}, detailed}
+		err := tmpl.Execute(b, g)
+		if log.E.Chk(err) {
+			return "", err
+		}
+		text = b.String()
+
+	case name != "":
+		g := help{TypesGrouped{
+			TypeGroup{name, c.GetByName(name)},
+		}, detailed}
+		err := tmpl.Execute(b, g)
+		if log.E.Chk(err) {
+			return "", err
+		}
+		text = b.String()
+
 	}
 	return
 }
