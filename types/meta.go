@@ -11,14 +11,14 @@ type Metadata struct {
 	sync.Mutex
 	name, group, description, documentation, def string
 	typ                                          Type
-	tags, aliases                                []string
+	aliases                                      []string
 }
 
 // Desc is the named field form of Metadata for generating a Metadata
 type Desc struct {
 	Name, Group, Description, Documentation, Default string
 	Type                                             Type
-	Tags, Aliases                                    []string
+	Aliases                                          []string
 }
 
 // New allows you to create a Metadata with a sparsely filled, named field
@@ -26,17 +26,12 @@ type Desc struct {
 //
 // name, type, group and tags all will be canonicalized to lower case.
 func New(args Desc) *Metadata {
-	// tags should be all lower case
-	for i := range args.Tags {
-		args.Tags[i] = strings.ToLower(args.Tags[i])
-	}
 	// name, type and group should also be lower case
 	return &Metadata{
 		name:          strings.ToLower(args.Name),
 		typ:           args.Type,
 		aliases:       args.Aliases,
 		group:         strings.ToLower(args.Group),
-		tags:          args.Tags,
 		description:   args.Description,
 		documentation: args.Documentation,
 		def:           args.Default,
@@ -75,11 +70,6 @@ func (m *Metadata) Name() string {
 	m.Lock()
 	defer m.Unlock()
 	return m.name
-}
-func (m *Metadata) Tags() []string {
-	m.Lock()
-	defer m.Unlock()
-	return m.tags
 }
 func (m *Metadata) Type() Type {
 	m.Lock()

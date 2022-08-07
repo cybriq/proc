@@ -29,10 +29,10 @@ following the principles of design used for Go itself.
 
 To make nice tagged versions with the version number in the commit as well as matching to the tag, there is a tool
 called [bumper](cmd/bumper) that bumps the version to the next patch version (vX.X.PATCH), embeds this new version
-number into [version.go](./version.go) with the matching corresponding git commit hash. This will make importing
+number into [version.go](./version.go) with the matching git commit hash of the parent commit. This will make importing
 this library at an exact commit much more human.
 
-In addition, it makes it easy to make a nice multi line commit message as many repositories request in their 
+In addition, it makes it easy to make a nice multi line commit message as many repositories request in their
 CONTRIBUTION file by replacing ` -- ` with two carriage returns.
 
 To install:
@@ -57,21 +57,22 @@ reasonably include in the README.
 
 - [x] Implement basic logger v0.0.x
 - [ ] Create concurrent safe configuration CLI/env/config system v0.1.x
-  - [x] Created types with mutex/atomic locks to prevent concurrent access
-  - [x] Created key value map type containing collections of concurrent safe values with concurrent safe access to 
-    members
-  - [x] Create JSON marshal/unmarshal for configuration collections
-  - [x] Created tests for generating and concurrently accessing/mutating data
-  - [x] Save and load configuration from file (using json, with all values stored in file, 
-    no unnecessary comments)
-  - [ ] Generate CLI help texts from configs specifications
-  - [ ] Read values from environment variables overlay on config file values
-  - [ ] Created command line parsing system overlay values above previous
+    - [x] Created types with mutex/atomic locks to prevent concurrent access
+    - [x] Created key value map type containing collections of concurrent safe values with concurrent safe access to
+      members
+    - [x] Create JSON marshal/unmarshal for configuration collections
+    - [x] Created tests for generating and concurrently accessing/mutating data
+    - [x] Save and load configuration from file (using json, with all values stored in file,
+      no unnecessary comments)
+    - [ ] Generate CLI help texts from configs specifications
+    - [ ] Read values from environment variables overlay on config file values
+    - [ ] Created command line parsing system overlay values above previous
 - [ ] Child process control system v0.2.x
-  - [ ] Launch, pause, continue and stop child process. Use only one method: the IPC API, no complication with signals.
-  - [ ] Read and pass through logging from child process
-  - [ ] Correctly handle process signals from OS/tty to trigger orderly shutdown of child processes and leave none 
-    orphaned
+    - [ ] Launch, pause, continue and stop child process. Use only one method: the IPC API, no complication with
+      signals.
+    - [ ] Read and pass through logging from child process
+    - [ ] Correctly handle process signals from OS/tty to trigger orderly shutdown of child processes and leave none
+      orphaned
 
 ## Contributing
 
