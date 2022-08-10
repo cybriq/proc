@@ -38,7 +38,7 @@ func main() {
 	o := `package types
 
 // This file is generated: DO NOT EDIT.
-//go:generate go run ./gen/main.go
+` + `//go:generate go run ./gen/main.go
 
 import "time"
 

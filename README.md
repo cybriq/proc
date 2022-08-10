@@ -73,6 +73,9 @@ reasonably include in the README.
     - [ ] Read and pass through logging from child process
     - [ ] Correctly handle process signals from OS/tty to trigger orderly shutdown of child processes and leave none
       orphaned
+    - [ ] Create a Rust implementation of the child process control interface so Rust services/libraries can be 
+      seamlessly integrated without FFI annoyances.
+- [ ] Build system that wraps around `go` to automatically update modified generators transparently.
 
 ## Contributing
 
