@@ -74,7 +74,7 @@ func TestConfigs_GetHelp(t *testing.T) {
 	// 	panic(err)
 	// }
 	t.Log("\n" + text)
-	text, _ = cfgs.GetHelp("", "group1", true)
+	text, _ = cfgs.GetHelp("", "group2", true)
 	// if err != nil {
 	// 	panic(err)
 	// }

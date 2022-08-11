@@ -13,19 +13,19 @@ type Configs struct {
 	persist sync.Mutex
 }
 
-// Create a new configuration from a slice of item Desc riptors.
+// Create a new configuration from a slice of item descriptors.
 func Create(items ...types.Desc) (c Configs) {
 	c = Configs{items: make(map[string]map[string]types.Item)}
 	c.Lock()
 	defer c.Unlock()
 	for i := range items {
 		name := items[i].Name
-		if _, ok := c.items[name]; ok {
-			panic("configs contains a duplicate named item: '" +
-				name + "'")
-		}
 		if _, ok := c.items[items[i].Group]; !ok {
 			c.items[items[i].Group] = make(map[string]types.Item)
+		}
+		if _, ok := c.items[items[i].Group][name]; ok {
+			panic("configs contains a duplicate named item: '" +
+				name + "' in group '" + items[i].Group + "'")
 		}
 		c.items[items[i].Group][name] = Item(types.New(items[i]))
 	}

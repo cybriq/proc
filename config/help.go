@@ -46,7 +46,7 @@ func (c *Configs) GetHelp(name, group string, detailed bool) (text string,
 
 	case name != "":
 		g := help{TypesGrouped{
-			TypeGroup{name, c.GetByName(name)},
+			TypeGroup{"", c.GetByName(name)},
 		}, detailed}
 		err := tmpl.Execute(b, g)
 		if log.E.Chk(err) {
