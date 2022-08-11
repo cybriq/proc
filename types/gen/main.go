@@ -1,12 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"bytes"
 	"io/ioutil"
+	"text/template"
+
+	"github.com/cybriq/proc"
 )
 
 // Pair is a set of type names and their actual implementation type
-type Pair struct{ name, typ string }
+type Pair struct{ Name, Type string }
 
 // Types is the list of names and concrete primitive types they represent
 var Types = []Pair{
@@ -33,10 +36,8 @@ var Types = []Pair{
 	},
 }
 
-func main() {
-
-	o := `package types
-
+var tmpl = `package types
+{{$t := .}}
 // This file is generated: DO NOT EDIT.
 ` + `//go:generate go run ./gen/main.go
 
@@ -47,36 +48,34 @@ type Type int
 
 // The list of types.Item supported by proc
 const (
-`
-	for i := range Types {
-		if i == 0 {
-			o += fmt.Sprintf("\t%s Type = iota\n", Types[i].name)
-		} else {
-			o += fmt.Sprintf("\t%s\n", Types[i].name)
-		}
-	}
-	o += `)
+{{range $i, $v := $t}}	{{$v.Name}}{{if $i}}{{else}} Type = iota{{end}}
+{{end}})
 
 // Names provides the string associated with the Concrete type.
 var Names = []string{
-`
-	for i := range Types {
-		o += fmt.Sprintf("\t\"%s\",\n", Types[i].name)
-	}
-	o += `}
+{{range $t}}	"{{.Name}}",
+{{end}}}
 
 // Concrete should return a value for the correct concrete type and panic
 // otherwise, except for String which should always yield a value.
 type Concrete interface {
+{{range $t}}	{{.Name}}() {{.Type}}
+{{end}}}
 `
-	for i := range Types {
-		o += fmt.Sprintf("\t%s() %s\n", Types[i].name, Types[i].typ)
-	}
 
-	o += `}
-`
-	err := ioutil.WriteFile("names.go", []byte(o), 0600)
-	if err != nil {
+var log = proc.GetLogger(proc.PathBase)
+
+func main() {
+	tm, _ := template.New("help").Parse(tmpl)
+	var buf []byte
+	b := bytes.NewBuffer(buf)
+	err := tm.Execute(b, Types)
+	if log.E.Chk(err) {
+		panic(err)
+	}
+	log.I.Ln("\n" + b.String())
+	err = ioutil.WriteFile("names.go", b.Bytes(), 0600)
+	if log.E.Chk(err) {
 		panic(err)
 	}
 }
