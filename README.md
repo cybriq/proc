@@ -60,11 +60,12 @@ To automatically bump the minor version use `minor` as the first word of the com
       members
     - [x] Create JSON marshal/unmarshal for configuration collections
     - [x] Created tests for generating and concurrently accessing/mutating data
-    - [x] Save and load configuration from file (using json, with all values stored in file,
-      no unnecessary comments)
+    - [x] Save and load configuration from file (using json, with all values stored in file, no unnecessary comments)
     - [x] Generate CLI help texts from configs specifications
-    - [ ] Read values from environment variables overlay on config file values
-    - [ ] Add command and subcommand definitions (for the sake of simplicity, not adding configs per subcommand!)
+    - [x] Read values from environment variables overlay on config file values
+    - [x] Add command and subcommand definitions (for the sake of simplicity, not adding 
+          configs per subcommand!) (straight reusing a simple recursive tree structured scheme
+          previously developed)
     - [ ] Created command line parsing system overlay values above previous
 - [ ] Child process control system v0.2.x
     - [ ] Launch, pause, continue and stop child process. Use only one method: the IPC API, no complication with

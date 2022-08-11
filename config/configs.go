@@ -16,7 +16,8 @@ type Configs struct {
 
 // Create a new configuration from a slice of item descriptors.
 func Create(appName string, items ...types.Desc) (c Configs) {
-	c = Configs{appName: appName, items: make(map[string]map[string]types.Item)}
+	c = Configs{appName: appName,
+		items: make(map[string]map[string]types.Item)}
 	c.Lock()
 	defer c.Unlock()
 	for i := range items {
