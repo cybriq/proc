@@ -86,6 +86,16 @@ func TestConfigs_GetHelp(t *testing.T) {
 	t.Log("\n" + text)
 }
 
+func TestConfigs_LoadAllFromEnv(t *testing.T) {
+	c := createConfig(t, &Configs{})
+	for i := range c.items {
+		for j := range c.items[i] {
+			t.Log(c.GetEnvString(i, j))
+		}
+	}
+	c.LoadAllFromEnv()
+}
+
 func readwrite(group, name string, wg *sync.WaitGroup, cfgs *Configs,
 	t *testing.T) {
 
@@ -285,7 +295,7 @@ var descs = []types.Desc{
 }
 
 func createConfig(t *testing.T, cfgs *Configs) *Configs {
-	*cfgs = Create(descs...)
+	*cfgs = Create("testapp", descs...)
 	return cfgs
 }
 
@@ -306,6 +316,7 @@ func marshalUnmarshal(t *testing.T, cfgs *Configs) *Configs {
 	}
 	if string(j) != s {
 		t.Log("marshal/unmarshal changed the content of configs")
+		t.Fail()
 	}
 	return cfgs
 }

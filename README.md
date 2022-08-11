@@ -49,8 +49,6 @@ To automatically bump the minor version use `minor` as the first word of the com
 
 ## Usage
 
-reasonably include in the README.
-
 ## Support
 
 ## Roadmap
@@ -66,6 +64,7 @@ reasonably include in the README.
       no unnecessary comments)
     - [x] Generate CLI help texts from configs specifications
     - [ ] Read values from environment variables overlay on config file values
+    - [ ] Add command and subcommand definitions (for the sake of simplicity, not adding configs per subcommand!)
     - [ ] Created command line parsing system overlay values above previous
 - [ ] Child process control system v0.2.x
     - [ ] Launch, pause, continue and stop child process. Use only one method: the IPC API, no complication with
@@ -73,8 +72,8 @@ reasonably include in the README.
     - [ ] Read and pass through logging from child process
     - [ ] Correctly handle process signals from OS/tty to trigger orderly shutdown of child processes and leave none
       orphaned
-    - [ ] Create a Rust implementation of the child process control interface so Rust services/libraries can be 
-      seamlessly integrated without FFI annoyances.
+    - [ ] Create a Rust implementation of the child process control interface and logger so Rust services/libraries
+      can be seamlessly integrated without FFI annoyances. Configuration can be controlled by the Go parent process.
 - [ ] Build system that wraps around `go` to automatically update modified generators transparently.
 
 ## Contributing
@@ -85,7 +84,7 @@ David Vennik david@cybriq.systems
 
 ## License
 
-Unlicenced: see [here](./LICENSE)
+Unlicensed: see [here](./LICENSE)
 
 ## Project status
 

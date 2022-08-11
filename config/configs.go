@@ -8,14 +8,15 @@ import (
 )
 
 type Configs struct {
-	items map[string]map[string]types.Item
+	appName string
+	items   map[string]map[string]types.Item
 	sync.Mutex
 	persist sync.Mutex
 }
 
 // Create a new configuration from a slice of item descriptors.
-func Create(items ...types.Desc) (c Configs) {
-	c = Configs{items: make(map[string]map[string]types.Item)}
+func Create(appName string, items ...types.Desc) (c Configs) {
+	c = Configs{appName: appName, items: make(map[string]map[string]types.Item)}
 	c.Lock()
 	defer c.Unlock()
 	for i := range items {

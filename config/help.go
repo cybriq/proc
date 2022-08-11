@@ -11,9 +11,13 @@ type help struct {
 }
 
 const helpTemplate = `
-{{$d := .Detailed}}{{range .TypesGrouped}}{{$g := .Name}}{{if $g}}group "{{.Name}}":
+{{$d := .Detailed}}{{range .TypesGrouped}}{{$g := .Name}}
+{{- if $g}}group "{{.Name}}":
 {{end}}
-{{range .Types}}{{if $g}}	{{end}}{{.Name}} ({{.Type}}) [{{if .Aliases}}{{range $index, $element := .Aliases}}{{if $index}}, {{end}}{{ $element }}{{end}}{{end}}] - {{.Description}} {{if ne $d true}} - Default: "{{.Default}}"{{end}}
+{{range .Types}}{{if $g}}	{{end}}{{.Name}} ({{.Type}}) [{{if .Aliases}}
+{{- range $index, $element := .Aliases}}{{if $index}}, {{end}}{{ $element }}
+{{- end}}{{end}}] - {{.Description}} {{if ne $d true}} - Default: "{{.Default}}"
+{{- end}}
 {{if $d}}{{.Documentation}}
 		Default: "{{.Default}}"
 
