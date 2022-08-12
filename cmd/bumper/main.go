@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	log2 "github.com/cybriq/proc/log"
+	log2 "github.com/cybriq/proc/pkg/log"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/storer"

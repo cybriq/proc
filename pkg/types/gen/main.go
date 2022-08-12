@@ -6,7 +6,7 @@ import (
 	"text/template"
 
 	"github.com/cybriq/proc"
-	log2 "github.com/cybriq/proc/log"
+	log2 "github.com/cybriq/proc/pkg/log"
 )
 
 // Pair is a set of type names and their actual implementation type
