@@ -5,12 +5,13 @@ import (
 	"time"
 
 	"github.com/cybriq/proc"
+	log2 "github.com/cybriq/proc/pkg/log"
 )
 
-var log = proc.GetLogger(proc.PathBase)
+var log = log2.GetLogger(proc.PathBase)
 
 func main() {
-	proc.App = "logtest"
+	log2.App = "logtest"
 	log.I.C(proc.Version)
 	log.T.Ln("testing")
 	log.D.Ln("testing")
@@ -18,11 +19,11 @@ func main() {
 	log.W.Ln("testing")
 	log.E.Chk(errors.New("testing"))
 	log.F.Ln("testing")
-	log.I.S(proc.AllSubsystems)
+	log.I.S(log2.AllSubsystems)
 	log.I.Ln("setting timestamp format to RFC822Z")
-	proc.SetTimeStampFormat(time.RFC822Z)
+	log2.SetTimeStampFormat(time.RFC822Z)
 	log.I.Ln("setting log level to info and printing from all levels")
-	proc.SetLogLevel(proc.Info)
+	log2.SetLogLevel(log2.Info)
 	log.T.Ln("testing")
 	log.D.Ln("testing")
 	log.I.Ln("testing")

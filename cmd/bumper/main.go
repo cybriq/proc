@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cybriq/proc"
+	log2 "github.com/cybriq/proc/log"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/storer"
@@ -42,7 +42,7 @@ func main() {
 		major = true
 		os.Args = append(os.Args[0:1], os.Args[2:]...)
 	}
-	proc.App = "bumper"
+	log2.App = "bumper"
 	BuildTime = time.Now().Format(time.RFC3339)
 	var cwd string
 	var e error

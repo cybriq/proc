@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/cybriq/proc/types"
+	"github.com/cybriq/proc/pkg/types"
 )
 
 func (c *Configs) Save(filename string) (err error) {

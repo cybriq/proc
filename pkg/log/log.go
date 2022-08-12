@@ -1,4 +1,4 @@
-package proc
+package log
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cybriq/proc"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/gookit/color"
 )
@@ -17,7 +18,7 @@ import (
 // log is your generic Logger creation invocation that uses the version data
 // in version.go that provides the current compilation path prefix for making
 // relative paths for log printing code locations.
-var log = GetLogger(PathBase)
+var log = GetLogger(proc.PathBase)
 
 // LogLevel is a code representing a scale of importance and context for log
 // entries.

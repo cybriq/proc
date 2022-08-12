@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	"github.com/cybriq/proc"
+	log2 "github.com/cybriq/proc/log"
 )
 
 // Pair is a set of type names and their actual implementation type
@@ -63,7 +64,7 @@ type Concrete interface {
 {{end}}}
 `
 
-var log = proc.GetLogger(proc.PathBase)
+var log = log2.GetLogger(proc.PathBase)
 
 func main() {
 	tm, _ := template.New("help").Parse(tmpl)

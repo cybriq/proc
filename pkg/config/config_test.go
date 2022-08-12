@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cybriq/proc/types"
+	"github.com/cybriq/proc/pkg/types"
 )
 
 func TestCreate(t *testing.T) {

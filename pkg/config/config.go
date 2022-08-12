@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/cybriq/proc/types"
+	"github.com/cybriq/proc/pkg/types"
 )
 
 // Get returns a named item from the Configs
