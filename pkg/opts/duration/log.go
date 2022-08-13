@@ -1,4 +1,4 @@
-package commands
+package duration
 
 import (
 	"github.com/cybriq/proc"

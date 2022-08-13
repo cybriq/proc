@@ -1,4 +1,4 @@
-package config
+package text
 
 import (
 	"github.com/cybriq/proc"
