@@ -1,6 +1,8 @@
 package opt
 
 import (
+	"reflect"
+
 	"github.com/cybriq/proc/pkg/opts/meta"
 )
 
@@ -16,7 +18,8 @@ type (
 		MarshalJSON() (b []byte, e error)
 		UnmarshalJSON(data []byte) (e error)
 		GetAllOptionStrings() []string
-		Type() interface{}
+		Type() reflect.Type
+		Value() interface{}
 		SetName(string)
 	}
 )

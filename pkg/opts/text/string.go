@@ -3,6 +3,7 @@ package text
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 	"sync/atomic"
 
@@ -15,7 +16,7 @@ import (
 type Opt struct {
 	meta.Data
 	hook  []Hook
-	Value *atomic.Value
+	value *atomic.Value
 	Def   string
 }
 
@@ -23,9 +24,10 @@ type Hook func(s []byte) error
 
 // New creates a new Opt with a given default value set
 func New(m meta.Data, def string, hook ...Hook) *Opt {
+	m.Type = fmt.Sprint(reflect.TypeOf(def))
 	v := &atomic.Value{}
 	v.Store([]byte(def))
-	return &Opt{Value: v, Data: m, Def: def, hook: hook}
+	return &Opt{value: v, Data: m, Def: def, hook: hook}
 }
 
 // SetName sets the name for the generator
@@ -35,8 +37,12 @@ func (x *Opt) SetName(name string) {
 }
 
 // Type returns the receiver wrapped in an interface for identifying its type
-func (x *Opt) Type() interface{} {
-	return x
+func (x *Opt) Type() reflect.Type {
+	return reflect.TypeOf(x.value.Load())
+}
+
+func (x *Opt) Value() interface{} {
+	return x.value.Load()
 }
 
 // GetMetadata returns the metadata of the opt type
@@ -124,12 +130,12 @@ func (x *Opt) SetHooks(hook ...Hook) {
 
 // V returns the stored string
 func (x *Opt) V() string {
-	return string(x.Value.Load().([]byte))
+	return string(x.value.Load().([]byte))
 }
 
 // Empty returns true if the string is empty
 func (x *Opt) Empty() bool {
-	return len(x.Value.Load().([]byte)) == 0
+	return len(x.value.Load().([]byte)) == 0
 }
 
 // Bytes returns the raw bytes in the underlying storage note that this returns
@@ -139,7 +145,7 @@ func (x *Opt) Empty() bool {
 // todo: make an option for the byte buffer to be MMU fenced to prevent
 //  elevated privilege processes from accessing this memory.
 func (x *Opt) Bytes() []byte {
-	byt := x.Value.Load().([]byte)
+	byt := x.value.Load().([]byte)
 	o := make([]byte, len(byt))
 	copy(o, byt)
 	return o
@@ -147,11 +153,11 @@ func (x *Opt) Bytes() []byte {
 
 // Zero the bytes
 func (x *Opt) Zero() {
-	byt := x.Value.Load().([]byte)
+	byt := x.value.Load().([]byte)
 	for i := range byt {
 		byt[i] = 0
 	}
-	x.Value.Store(byt)
+	x.value.Store(byt)
 }
 
 func (x *Opt) runHooks(s []byte) (e error) {
@@ -166,7 +172,7 @@ func (x *Opt) runHooks(s []byte) (e error) {
 // Set the value stored
 func (x *Opt) Set(s string) (e error) {
 	if e = x.runHooks([]byte(s)); !log.E.Chk(e) {
-		x.Value.Store([]byte(s))
+		x.value.Store([]byte(s))
 	}
 	return
 }
@@ -174,7 +180,7 @@ func (x *Opt) Set(s string) (e error) {
 // SetBytes sets the string from bytes
 func (x *Opt) SetBytes(s []byte) (e error) {
 	if e = x.runHooks(s); !log.E.Chk(e) {
-		x.Value.Store(s)
+		x.value.Store(s)
 	}
 	return
 }
@@ -186,14 +192,14 @@ func (x *Opt) String() string {
 
 // MarshalJSON returns the json representation
 func (x *Opt) MarshalJSON() (b []byte, e error) {
-	v := string(x.Value.Load().([]byte))
+	v := string(x.value.Load().([]byte))
 	return json.Marshal(&v)
 }
 
 // UnmarshalJSON decodes a JSON representation
 func (x *Opt) UnmarshalJSON(data []byte) (e error) {
-	v := x.Value.Load().([]byte)
+	v := x.value.Load().([]byte)
 	e = json.Unmarshal(data, &v)
-	x.Value.Store(v)
+	x.value.Store(v)
 	return
 }

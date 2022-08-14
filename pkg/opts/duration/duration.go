@@ -3,6 +3,7 @@ package duration
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 	"time"
 
@@ -19,18 +20,19 @@ type Opt struct {
 	hook     []Hook
 	clamp    func(input time.Duration) (result time.Duration)
 	Min, Max time.Duration
-	Value    *atomic.Duration
+	value    *atomic.Duration
 	Def      time.Duration
 }
 
 type Hook func(d time.Duration) error
 
 // New creates a new Opt with a given default value set
-func New(
-	m meta.Data, def time.Duration, min, max time.Duration, hook ...Hook,
-) *Opt {
+func New(m meta.Data, def time.Duration, min, max time.Duration,
+	hook ...Hook) *Opt {
+
+	m.Type = fmt.Sprint(reflect.TypeOf(def))
 	return &Opt{
-		Value: atomic.NewDuration(def),
+		value: atomic.NewDuration(def),
 		Data:  m,
 		Def:   def,
 		Min:   min,
@@ -47,8 +49,12 @@ func (x *Opt) SetName(name string) {
 }
 
 // Type returns the receiver wrapped in an interface for identifying its type
-func (x *Opt) Type() interface{} {
-	return x
+func (x *Opt) Type() reflect.Type {
+	return reflect.TypeOf(x.value.Load())
+}
+
+func (x *Opt) Value() interface{} {
+	return x.value.Load()
 }
 
 // GetMetadata returns the metadata of the opt type
@@ -101,7 +107,7 @@ func (x *Opt) SetHooks(hook ...Hook) {
 
 // V returns the value stored
 func (x *Opt) V() time.Duration {
-	return x.Value.Load()
+	return x.value.Load()
 }
 
 func (x *Opt) runHooks(d time.Duration) (e error) {
@@ -117,7 +123,7 @@ func (x *Opt) runHooks(d time.Duration) (e error) {
 func (x *Opt) Set(d time.Duration) (e error) {
 	d = x.clamp(d)
 	if e = x.runHooks(d); !log.E.Chk(e) {
-		x.Value.Store(d)
+		x.value.Store(d)
 	}
 	return
 }
@@ -129,13 +135,13 @@ func (x *Opt) String() string {
 
 // MarshalJSON returns the json representation
 func (x *Opt) MarshalJSON() (b []byte, e error) {
-	v := x.Value.Load()
+	v := x.value.Load()
 	return json.Marshal(&v)
 }
 
 // UnmarshalJSON decodes a JSON representation
 func (x *Opt) UnmarshalJSON(data []byte) (e error) {
-	v := x.Value.Load()
+	v := x.value.Load()
 	e = json.Unmarshal(data, &v)
 	e = x.Set(v)
 	return

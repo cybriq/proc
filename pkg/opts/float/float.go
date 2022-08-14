@@ -3,6 +3,7 @@ package float
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -19,7 +20,7 @@ type Opt struct {
 	hook     []Hook
 	Min, Max float64
 	clamp    func(input float64) (result float64)
-	Value    *atomic.Float64
+	value    *atomic.Float64
 	Def      float64
 }
 
@@ -27,8 +28,9 @@ type Hook func(f float64) error
 
 // New returns a new Opt value set to a default value
 func New(m meta.Data, def float64, min, max float64, hook ...Hook) *Opt {
+	m.Type = fmt.Sprint(reflect.TypeOf(def))
 	return &Opt{
-		Value: atomic.NewFloat64(def),
+		value: atomic.NewFloat64(def),
 		Data:  m,
 		Def:   def,
 		Min:   min,
@@ -45,8 +47,12 @@ func (x *Opt) SetName(name string) {
 }
 
 // Type returns the receiver wrapped in an interface for identifying its type
-func (x *Opt) Type() interface{} {
-	return x
+func (x *Opt) Type() reflect.Type {
+	return reflect.TypeOf(x.value.Load())
+}
+
+func (x *Opt) Value() interface{} {
+	return x.value.Load()
 }
 
 // GetMetadata returns the metadata of the opt type
@@ -99,7 +105,7 @@ func (x *Opt) SetHooks(hook ...Hook) {
 
 // V returns the value stored
 func (x *Opt) V() float64 {
-	return x.Value.Load()
+	return x.value.Load()
 }
 
 func (x *Opt) runHooks(f float64) (e error) {
@@ -115,7 +121,7 @@ func (x *Opt) runHooks(f float64) (e error) {
 func (x *Opt) Set(f float64) (e error) {
 	f = x.clamp(f)
 	if e = x.runHooks(f); !log.E.Chk(e) {
-		x.Value.Store(f)
+		x.value.Store(f)
 	}
 	return
 }
@@ -127,13 +133,13 @@ func (x *Opt) String() string {
 
 // MarshalJSON returns the json representation of
 func (x *Opt) MarshalJSON() (b []byte, e error) {
-	v := x.Value.Load()
+	v := x.value.Load()
 	return json.Marshal(&v)
 }
 
 // UnmarshalJSON decodes a JSON representation of
 func (x *Opt) UnmarshalJSON(data []byte) (e error) {
-	v := x.Value.Load()
+	v := x.value.Load()
 	e = json.Unmarshal(data, &v)
 	e = x.Set(v)
 	return

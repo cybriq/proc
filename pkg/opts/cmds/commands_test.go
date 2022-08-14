@@ -11,12 +11,12 @@ func TestCommandsForeach(t *testing.T) {
 		if cmd.Name == "droptxindex" {
 			log.I.S(cmd)
 		}
-		return false
+		return true
 	})
 	log.I.Ln("printing name of all commands found on search")
 	cm.Foreach(func(cmd *Command) bool {
-		log.I.S(cmd.Name)
-		return false
+		log.I.Ln(cmd.Name)
+		return true
 	})
 }
 

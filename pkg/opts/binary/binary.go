@@ -3,6 +3,7 @@ package binary
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"go.uber.org/atomic"
@@ -23,6 +24,7 @@ type Hook func(b bool) error
 
 // New creates a new Opt with default values set
 func New(m meta.Data, def bool, hook ...Hook) *Opt {
+	m.Type = fmt.Sprint(reflect.TypeOf(def))
 	return &Opt{value: atomic.NewBool(def), Data: m, Def: def, hook: hook}
 }
 
@@ -33,8 +35,12 @@ func (x *Opt) SetName(name string) {
 }
 
 // Type returns the receiver wrapped in an interface for identifying its type
-func (x *Opt) Type() interface{} {
-	return x
+func (x *Opt) Type() reflect.Type {
+	return reflect.TypeOf(x.value.Load())
+}
+
+func (x *Opt) Value() interface{} {
+	return x.value.Load()
 }
 
 // GetMetadata returns the metadata of the opt type

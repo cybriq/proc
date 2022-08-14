@@ -33,7 +33,6 @@ const tabs = "\t\t\t\t\t"
 func (c Commands) Foreach(cl func(*Command) bool) {
 	c.foreach(cl, 0, 0, nil)
 }
-
 func (c Commands) foreach(cl func(*Command) bool, hereDepth, hereDist int,
 	cmd *Command) (ocl func(*Command) bool, depth, dist int, cm *Command) {
 
@@ -49,7 +48,7 @@ func (c Commands) foreach(cl func(*Command) bool, hereDepth, hereDist int,
 	dist = hereDist
 	for i := range c {
 		log.T.Ln(tabs[:depth]+"walking", c[i].Name, depth, dist)
-		if cl(&c[i]) {
+		if !cl(&c[i]) {
 			return
 		}
 		dist++

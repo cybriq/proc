@@ -3,6 +3,7 @@ package list
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 	"sync/atomic"
 
@@ -17,7 +18,7 @@ import (
 type Opt struct {
 	meta.Data
 	hook  []Hook
-	Value *atomic.Value
+	value *atomic.Value
 	Def   []string
 }
 
@@ -25,9 +26,10 @@ type Hook func(s []string) error
 
 // New  creates a new Opt with default values set
 func New(m meta.Data, def []string, hook ...Hook) *Opt {
+	m.Type = fmt.Sprint(reflect.TypeOf(def))
 	as := &atomic.Value{}
 	as.Store(def)
-	return &Opt{Value: as, Data: m, Def: def, hook: hook}
+	return &Opt{value: as, Data: m, Def: def, hook: hook}
 }
 
 // SetName sets the name for the generator
@@ -37,8 +39,12 @@ func (x *Opt) SetName(name string) {
 }
 
 // Type returns the receiver wrapped in an interface for identifying its type
-func (x *Opt) Type() interface{} {
-	return x
+func (x *Opt) Type() reflect.Type {
+	return reflect.TypeOf(x.value.Load())
+}
+
+func (x *Opt) Value() interface{} {
+	return x.value.Load()
 }
 
 // GetMetadata returns the metadata of the opt type
@@ -127,7 +133,7 @@ func (x *Opt) SetHooks(hook ...Hook) {
 
 // V returns the stored value
 func (x *Opt) V() []string {
-	return x.Value.Load().([]string)
+	return x.value.Load().([]string)
 }
 
 // Len returns the length of the slice of strings
@@ -147,14 +153,14 @@ func (x *Opt) runHooks(s []string) (e error) {
 // Set the slice of strings stored
 func (x *Opt) Set(ss []string) (e error) {
 	if e = x.runHooks(ss); !log.E.Chk(e) {
-		x.Value.Store(ss)
+		x.value.Store(ss)
 	}
 	return
 }
 
 // S returns the value as a slice of string
 func (x *Opt) S() []string {
-	return x.Value.Load().([]string)
+	return x.value.Load().([]string)
 }
 
 // String returns a string representation of the value
@@ -164,7 +170,7 @@ func (x *Opt) String() string {
 
 // MarshalJSON returns the json representation of
 func (x *Opt) MarshalJSON() (b []byte, e error) {
-	xs := x.Value.Load().([]string)
+	xs := x.value.Load().([]string)
 	return json.Marshal(xs)
 }
 
@@ -172,6 +178,6 @@ func (x *Opt) MarshalJSON() (b []byte, e error) {
 func (x *Opt) UnmarshalJSON(data []byte) (e error) {
 	var v []string
 	e = json.Unmarshal(data, &v)
-	x.Value.Store(v)
+	x.value.Store(v)
 	return
 }
