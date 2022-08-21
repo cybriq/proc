@@ -1,4 +1,4 @@
-package binary
+package toggle
 
 import (
 	"github.com/cybriq/proc"

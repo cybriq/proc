@@ -151,7 +151,8 @@ func GetLoc(skip int, subsystem string) (output string) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Fprintln(
-				os.Stderr, "getloc panic on subsystem", subsystem, file,
+				os.Stderr, "getloc panic on subsystem",
+				subsystem, file,
 			)
 		}
 	}()
@@ -303,7 +304,8 @@ func _c(level LogLevel, subsystem string) Printc {
 func _chk(level LogLevel, subsystem string) Chk {
 	return func(e error) (is bool) {
 		if e != nil {
-			logPrint(level, subsystem, joinStrings(" ", e.Error()))()
+			logPrint(level, subsystem,
+				joinStrings(" ", e.Error()))()
 			is = true
 		}
 		return
