@@ -59,3 +59,14 @@ func (o *Opt) Value() (c opts.Concrete) {
 	c.Integer = func() int64 { return o.v.Load() }
 	return
 }
+
+func Clamp(o *Opt, min, max int64) func(*Opt) {
+	return func(o *Opt) {
+		v := o.v.Load()
+		if v < min {
+			o.v.Store(min)
+		} else if v > max {
+			o.v.Store(max)
+		}
+	}
+}

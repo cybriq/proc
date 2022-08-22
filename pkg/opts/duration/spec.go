@@ -16,7 +16,7 @@ type Opt struct {
 	h []Hook
 }
 
-type Hook func(*Opt) error
+type Hook func(*Opt)
 
 func New(m meta.Data, h ...Hook) (o *Opt) {
 	m.Type = meta.Duration
@@ -31,10 +31,7 @@ func (o *Opt) ToOption() opts.Option { return o }
 
 func (o *Opt) RunHooks() (e error) {
 	for i := range o.h {
-		e = o.h[i](o)
-		if e != nil {
-			return
-		}
+		o.h[i](o)
 	}
 	return
 }
@@ -59,4 +56,15 @@ func (o *Opt) Value() (c opts.Concrete) {
 	c = opts.NewConcrete()
 	c.Duration = func() time.Duration { return o.v.Load() }
 	return
+}
+
+func Clamp(o *Opt, min, max time.Duration) func(*Opt) {
+	return func(o *Opt) {
+		v := o.v.Load()
+		if v < min {
+			o.v.Store(min)
+		} else if v > max {
+			o.v.Store(max)
+		}
+	}
 }
