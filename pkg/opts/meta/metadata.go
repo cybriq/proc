@@ -34,7 +34,7 @@ type Metadata struct {
 	Documentation func() string
 	Default       func() string
 	Options       func() []string
-	typ           Type
+	Typ           Type
 }
 
 // New loads Data into a Metadata. Implementing types need to populate the
@@ -51,6 +51,3 @@ func New(d Data) Metadata {
 		d.Type,
 	}
 }
-
-func (md Metadata) Meta() Metadata { return md }
-func (md Metadata) Type() Type     { return md.typ }

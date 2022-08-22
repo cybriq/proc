@@ -8,9 +8,6 @@ import (
 
 // Concrete is a struct of functions that return the concrete values. Only the
 // intended type will return a value, the rest always return zero.
-//
-// Note there is no meta.Text type because this can be had using the
-// Option.String method below in all cases.
 type Concrete struct {
 	Bool     func() bool
 	Duration func() time.Duration

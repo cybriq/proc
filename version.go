@@ -10,11 +10,11 @@ var (
 	// GitRef is the gitref, as in refs/heads/branchname
 	GitRef = "refs/heads/master"
 	// ParentGitCommit is the commit hash of the parent HEAD
-	ParentGitCommit = "b10999fc91d84edd8d4e28a396c7d64ee8eee387"
+	ParentGitCommit = "becd3d5c11b462a7eaca891e1fb2551137990217"
 	// BuildTime stores the time when the current binary was built
-	BuildTime = "2022-08-21T20:49:08+02:00"
+	BuildTime = "2022-08-22T14:37:01+02:00"
 	// SemVer lists the (latest) git tag on the build
-	SemVer = "v0.1.18"
+	SemVer = "v0.1.19"
 	// PathBase is the path base returned from runtime caller
 	PathBase = "/home/loki/src/github.com/cybriq/proc/"
 	// Major is the major number from the tag
@@ -22,7 +22,7 @@ var (
 	// Minor is the minor number from the tag
 	Minor = 1
 	// Patch is the patch version number from the tag
-	Patch = 18
+	Patch = 19
 )
 
 // Version returns a pretty printed version information string
