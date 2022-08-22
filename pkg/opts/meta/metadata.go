@@ -24,8 +24,8 @@ type Data struct {
 	Options       []string
 }
 
-// Metadata is a set of accessor functions, which avoids race conditions, values
-// are always copied
+// Metadata is a set of accessor functions that never write to the store and
+// thus do not create race conditions.
 type Metadata struct {
 	Aliases       func() []string
 	Tags          func() []string

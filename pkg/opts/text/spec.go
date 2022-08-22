@@ -5,6 +5,7 @@ import (
 
 	"github.com/cybriq/proc/pkg/opts"
 	"github.com/cybriq/proc/pkg/opts/meta"
+	"github.com/cybriq/proc/pkg/opts/normalize"
 	"go.uber.org/atomic"
 )
 
@@ -52,4 +53,15 @@ func (o *Opt) Value() (c opts.Concrete) {
 	c = opts.NewConcrete()
 	c.Text = func() string { return o.v.Load() }
 	return
+}
+
+func NormalizeNetworkAddress(o *Opt, defaultPort string) func(*Opt) error {
+	return func(o *Opt) (e error) {
+		var a string
+		a, e = normalize.Address(o.v.Load(), defaultPort)
+		if !log.E.Chk(e) {
+			o.v.Store(a)
+		}
+		return
+	}
 }

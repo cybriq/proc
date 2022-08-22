@@ -5,6 +5,7 @@ import (
 
 	"github.com/cybriq/proc/pkg/opts"
 	"github.com/cybriq/proc/pkg/opts/meta"
+	"github.com/cybriq/proc/pkg/opts/normalize"
 	"go.uber.org/atomic"
 )
 
@@ -53,4 +54,16 @@ func (o *Opt) Value() (c opts.Concrete) {
 	c = opts.NewConcrete()
 	c.List = func() []string { return o.v.Load().([]string) }
 	return
+}
+
+func NormalizeNetworkAddresses(o *Opt, defaultPort string) func(*Opt) error {
+	return func(o *Opt) (e error) {
+		var a []string
+		a, e = normalize.Addresses(o.v.Load().([]string), defaultPort)
+		if !log.E.Chk(e) {
+			o.v.Store(a)
+		}
+		a = normalize.RemoveDuplicateAddresses(a)
+		return
+	}
 }
