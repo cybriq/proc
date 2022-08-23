@@ -189,7 +189,8 @@ func Version() string {
 		Patch,
 	)
 	path := filepath.Join(PathBase, "version.go")
-	if e = ioutil.WriteFile(path, []byte(versionFileOut), 0666); log.E.Chk(e) {
+	if e = ioutil.WriteFile(path, []byte(versionFileOut),
+		0666); log.E.Chk(e) {
 		fmt.Println(e)
 	}
 	log.I.Ln(
@@ -238,7 +239,7 @@ func runCmd(cmd ...string) (err error) {
 	var output []byte
 	output, err = c.CombinedOutput()
 	if err == nil && string(output) != "" {
-		log.I.Ln("\n", string(output))
+		fmt.Println(string(output))
 	}
 	return
 }

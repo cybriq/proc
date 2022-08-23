@@ -25,6 +25,7 @@ func Address(addr, defaultPort string, userOnly bool) (a string, e error) {
 // with the given default port, and all duplicates removed.
 func Addresses(addrs []string, defaultPort string, userOnly bool) (a []string,
 	e error) {
+
 	for i := range addrs {
 		addrs[i], e = Address(addrs[i], defaultPort, userOnly)
 	}
