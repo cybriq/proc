@@ -239,7 +239,7 @@ func runCmd(cmd ...string) (err error) {
 	var output []byte
 	output, err = c.CombinedOutput()
 	if err == nil && string(output) != "" {
-		fmt.Println(string(output))
+		fmt.Print(string(output))
 	}
 	return
 }
