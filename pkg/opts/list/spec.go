@@ -56,10 +56,12 @@ func (o *Opt) Value() (c opts.Concrete) {
 	return
 }
 
-func NormalizeNetworkAddresses(o *Opt, defaultPort string) func(*Opt) error {
+func NormalizeNetworkAddresses(defaultPort string,
+	userOnly bool) func(*Opt) error {
 	return func(o *Opt) (e error) {
 		var a []string
-		a, e = normalize.Addresses(o.v.Load().([]string), defaultPort)
+		a, e = normalize.Addresses(o.v.Load().([]string), defaultPort,
+			userOnly)
 		if !log.E.Chk(e) {
 			o.v.Store(a)
 		}

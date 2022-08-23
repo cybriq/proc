@@ -55,7 +55,7 @@ func (o *Opt) Value() (c opts.Concrete) {
 	return
 }
 
-func NormalizeNetworkAddress(o *Opt, defaultPort string) func(*Opt) error {
+func NormalizeNetworkAddress(defaultPort string) func(*Opt) error {
 	return func(o *Opt) (e error) {
 		var a string
 		a, e = normalize.Address(o.v.Load(), defaultPort)
