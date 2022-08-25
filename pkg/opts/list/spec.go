@@ -18,8 +18,7 @@ type Opt struct {
 type Hook func(*Opt) error
 
 func New(m meta.Data, h ...Hook) (o *Opt) {
-	m.Type = meta.List
-	o = &Opt{m: meta.New(m), h: h}
+	o = &Opt{m: meta.New(m, meta.List), h: h}
 	_ = o.FromString(m.Default)
 	return
 }

@@ -19,7 +19,6 @@ type Data struct {
 	Label         string
 	Description   string
 	Documentation string
-	Type          Type
 	Default       string
 	Options       []string
 }
@@ -39,7 +38,7 @@ type Metadata struct {
 
 // New loads Data into a Metadata. Implementing types need to populate the
 // Data.Type field before calling this function
-func New(d Data) Metadata {
+func New(d Data, t Type) Metadata {
 	return Metadata{
 		func() []string { return d.Aliases },
 		func() []string { return d.Tags },
@@ -48,6 +47,6 @@ func New(d Data) Metadata {
 		func() string { return d.Documentation },
 		func() string { return d.Default },
 		func() []string { return d.Options },
-		d.Type,
+		t,
 	}
 }

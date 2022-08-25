@@ -18,8 +18,7 @@ type Opt struct {
 type Hook func(*Opt) error
 
 func New(m meta.Data, h ...Hook) (o *Opt) {
-	m.Type = meta.Text
-	o = &Opt{m: meta.New(m), h: h}
+	o = &Opt{m: meta.New(m, meta.Text), h: h}
 	_ = o.FromString(m.Default)
 	return
 }
@@ -55,10 +54,12 @@ func (o *Opt) Value() (c opts.Concrete) {
 	return
 }
 
-func NormalizeNetworkAddress(defaultPort string) func(*Opt) error {
+func NormalizeNetworkAddress(defaultPort string,
+	userOnly bool) func(*Opt) error {
+
 	return func(o *Opt) (e error) {
 		var a string
-		a, e = normalize.Address(o.v.Load(), defaultPort)
+		a, e = normalize.Address(o.v.Load(), defaultPort, userOnly)
 		if !log.E.Chk(e) {
 			o.v.Store(a)
 		}
