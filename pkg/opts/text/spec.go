@@ -54,6 +54,9 @@ func (o *Opt) Value() (c opts.Concrete) {
 	return
 }
 
+// NormalizeNetworkAddress checks correctness of a network address
+// specification, and adds a default path if needed, and enforces whether the
+// port requires root permission and clamps it if not.
 func NormalizeNetworkAddress(defaultPort string,
 	userOnly bool) func(*Opt) error {
 
@@ -62,6 +65,20 @@ func NormalizeNetworkAddress(defaultPort string,
 		a, e = normalize.Address(o.v.Load(), defaultPort, userOnly)
 		if !log.E.Chk(e) {
 			o.v.Store(a)
+		}
+		return
+	}
+}
+
+// NormalizeFilesystemPath cleans a directory specification, expands the ~ home
+// folder shortcut, and if abs is set to true, returns the absolute path from
+// filesystem root
+func NormalizeFilesystemPath(abs bool) func(*Opt) error {
+	return func(o *Opt) (e error) {
+		var cleaned string
+		cleaned, e = normalize.ResolvePath(o.v.Load(), abs)
+		if !log.E.Chk(e) {
+			o.v.Store(cleaned)
 		}
 		return
 	}
