@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/gookit/color v1.5.1
+	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	go.uber.org/atomic v1.10.0
 	gopkg.in/src-d/go-git.v4 v4.13.1
 )
