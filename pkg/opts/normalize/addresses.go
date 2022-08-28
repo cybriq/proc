@@ -29,7 +29,8 @@ func Addresses(addrs []string, defaultPort string, userOnly bool) (a []string,
 	for i := range addrs {
 		addrs[i], e = Address(addrs[i], defaultPort, userOnly)
 	}
-	return addrs, e
+	a = RemoveDuplicateAddresses(addrs)
+	return
 }
 
 // RemoveDuplicateAddresses returns a new slice with all duplicate entries in
