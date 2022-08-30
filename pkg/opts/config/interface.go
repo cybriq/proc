@@ -1,4 +1,4 @@
-package opts
+package config
 
 import (
 	"time"
@@ -37,12 +37,4 @@ type Option interface {
 	Value() (c Concrete)
 	Type() (t meta.Type)
 	Meta() (md meta.Metadata)
-}
-
-type Config map[string]map[string]Option
-
-// MarshalText produces a standard TOML format document via toml.Marshal that
-// can be used to toml.UnmarshalTOML back into the Config.
-func (c Config) MarshalText() (b []byte, e error) {
-	return
 }

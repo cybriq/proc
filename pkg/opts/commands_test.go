@@ -1,4 +1,4 @@
-package cmds
+package opts
 
 import (
 	"testing"
@@ -24,7 +24,8 @@ func TestCommandsForeach(t *testing.T) {
 func GetCommands() (c Commands) {
 	c = Commands{
 		{
-			Name: "gui", Title: "ParallelCoin GUI Wallet/Miner/Explorer",
+			Name:       "gui",
+			Title:      "ParallelCoin GUI Wallet/Miner/Explorer",
 			Entrypoint: func(c interface{}) error { return nil },
 		},
 		{
@@ -32,13 +33,14 @@ func GetCommands() (c Commands) {
 			Entrypoint: func(c interface{}) error { return nil },
 		},
 		{
-			Name: "ctl", Title: "command line wallet and chain RPC client",
+			Name:       "ctl",
+			Title:      "command line wallet and chain RPC client",
 			Entrypoint: func(c interface{}) error { return nil },
 		},
 		{
 			Name: "node", Title: "ParallelCoin blockchain node",
 			Entrypoint: func(c interface{}) error { return nil },
-			Commands: []Command{
+			Commands: []*Command{
 				{
 					Name:       "dropaddrindex",
 					Title:      "drop the address database index",
@@ -55,7 +57,8 @@ func GetCommands() (c Commands) {
 					Entrypoint: func(c interface{}) error { return nil },
 				},
 				{
-					Name: "dropindexes", Title: "drop all of the indexes",
+					Name:       "dropindexes",
+					Title:      "drop all of the indexes",
 					Entrypoint: func(c interface{}) error { return nil },
 				},
 				{
@@ -69,7 +72,7 @@ func GetCommands() (c Commands) {
 			Name:       "wallet",
 			Title:      "run the wallet server (requires a chain node to function)",
 			Entrypoint: func(c interface{}) error { return nil },
-			Commands: []Command{
+			Commands: []*Command{
 				{
 					Name:       "drophistory",
 					Title:      "reset the wallet transaction history",

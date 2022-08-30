@@ -1,32 +1,45 @@
-package cmds
+package opts
+
+import (
+	"sync"
+
+	"github.com/cybriq/proc/pkg/opts/config"
+)
 
 // Command is a specification for a command and can include any number of
-// subcommands
+// subcommands, and for each Command a list of options
 type Command struct {
-	Name        string
-	Title       string
-	Description string
-	Entrypoint  func(c interface{}) error
-	Commands    Commands
-	Colorizer   func(a ...interface{}) string
-	AppText     string
-	Parent      *Command
+	Name          string
+	Title         string
+	Description   string
+	Documentation string
+	Entrypoint    func(c interface{}) error
+	Commands      Commands
+	Parent        *Command
+	Opts          map[string]config.Option
+	sync.Mutex
 }
 
 // Commands are a slice of Command entries
-type Commands []Command
+type Commands []*Command
 
-func (c Commands) PopulateParents(parent *Command) {
-	if parent != nil {
-		log.T.Ln("backlinking children of", parent.Name)
+func New(c Command) (o *Command) {
+	o = &c
+	populateParents(o)
+	return
+}
+
+func populateParents(c *Command) {
+	if c.Parent != nil {
+		log.T.Ln("backlinking children of", c.Parent.Name)
 	}
-	for i := range c {
-		c[i].Parent = parent
-		c[i].Commands.PopulateParents(&c[i])
+	for i := range c.Commands {
+		c.Commands[i].Parent = c.Parent
+		populateParents(c.Commands[i])
 	}
 }
 
-const tabs = "\t\t\t\t\t"
+const tabs = "\t\t\t\t\t\t\t\t\t\t"
 
 // Foreach runs a closure on every node in the Commands tree, stopping if the
 // closure returns false
@@ -48,7 +61,7 @@ func (c Commands) foreach(cl func(*Command) bool, hereDepth, hereDist int,
 	dist = hereDist
 	for i := range c {
 		log.T.Ln(tabs[:depth]+"walking", c[i].Name, depth, dist)
-		if !cl(&c[i]) {
+		if !cl(c[i]) {
 			return
 		}
 		dist++

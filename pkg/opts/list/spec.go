@@ -3,7 +3,7 @@ package list
 import (
 	"strings"
 
-	"github.com/cybriq/proc/pkg/opts"
+	"github.com/cybriq/proc/pkg/opts/config"
 	"github.com/cybriq/proc/pkg/opts/meta"
 	"github.com/cybriq/proc/pkg/opts/normalize"
 	"go.uber.org/atomic"
@@ -23,9 +23,9 @@ func New(m meta.Data, h ...Hook) (o *Opt) {
 	return
 }
 
-func (o *Opt) Meta() meta.Metadata   { return o.m }
-func (o *Opt) Type() meta.Type       { return o.m.Typ }
-func (o *Opt) ToOption() opts.Option { return o }
+func (o *Opt) Meta() meta.Metadata     { return o.m }
+func (o *Opt) Type() meta.Type         { return o.m.Typ }
+func (o *Opt) ToOption() config.Option { return o }
 
 func (o *Opt) RunHooks() (e error) {
 	for i := range o.h {
@@ -49,8 +49,8 @@ func (o *Opt) String() (s string) {
 	return strings.Join(o.v.Load().([]string), ",")
 }
 
-func (o *Opt) Value() (c opts.Concrete) {
-	c = opts.NewConcrete()
+func (o *Opt) Value() (c config.Concrete) {
+	c = config.NewConcrete()
 	c.List = func() []string { return o.v.Load().([]string) }
 	return
 }

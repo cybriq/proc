@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cybriq/proc/pkg/opts/config"
 	"go.uber.org/atomic"
 
-	"github.com/cybriq/proc/pkg/opts"
 	"github.com/cybriq/proc/pkg/opts/meta"
 )
 
@@ -25,9 +25,9 @@ func New(m meta.Data, h ...Hook) (o *Opt) {
 	return
 }
 
-func (o *Opt) Meta() meta.Metadata   { return o.m }
-func (o *Opt) Type() meta.Type       { return o.m.Typ }
-func (o *Opt) ToOption() opts.Option { return o }
+func (o *Opt) Meta() meta.Metadata     { return o.m }
+func (o *Opt) Type() meta.Type         { return o.m.Typ }
+func (o *Opt) ToOption() config.Option { return o }
 
 func (o *Opt) RunHooks() (e error) {
 	for i := range o.h {
@@ -57,8 +57,8 @@ func (o *Opt) String() (s string) {
 	return strconv.FormatBool(o.v.Load())
 }
 
-func (o *Opt) Value() (c opts.Concrete) {
-	c = opts.NewConcrete()
+func (o *Opt) Value() (c config.Concrete) {
+	c = config.NewConcrete()
 	c.Bool = func() bool { return o.v.Load() }
 	return
 }
