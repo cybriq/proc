@@ -10,6 +10,9 @@ import (
 type Op func(c interface{}) error
 
 var NoOp = func(c interface{}) error { return nil }
+var Tags = func(s ...string) []string {
+	return s
+}
 
 // Command is a specification for a command and can include any number of
 // subcommands, and for each Command a list of options
@@ -18,31 +21,41 @@ type Command struct {
 	Description   string
 	Documentation string
 	Entrypoint    Op
-	parent        *Command
+	Parent        *Command
 	Commands      Commands
-	Opts          map[string]config.Option
+	Configs       config.Opts
 	sync.Mutex
 }
 
 // Commands are a slice of Command entries
 type Commands []*Command
 
-func New(c *Command) *Command {
-	initCommand(c)
-	return c
-}
-
-func initCommand(c *Command) {
-	if c.parent != nil {
-		log.T.Ln("backlinking children of", c.parent.Name)
+func Init(c *Command) *Command {
+	if c.Parent != nil {
+		log.T.Ln("backlinking children of", c.Parent.Name)
 	}
 	if c.Entrypoint == nil {
 		c.Entrypoint = NoOp
 	}
 	for i := range c.Commands {
-		c.Commands[i].parent = c
-		initCommand(c.Commands[i])
+		c.Commands[i].Parent = c
+		Init(c.Commands[i])
 	}
+	return c
+}
+
+func Cmd(name, desc, doc string, op Op, cfg map[string]config.Option,
+	cmds ...*Command) (c *Command) {
+
+	c = &Command{
+		Name:          name,
+		Description:   desc,
+		Documentation: doc,
+		Entrypoint:    op,
+		Commands:      cmds,
+		Configs:       cfg,
+	}
+	return
 }
 
 const tabs = "\t\t\t\t\t\t\t\t\t\t"
@@ -92,12 +105,12 @@ func (c *Command) MarshalText() (text []byte, err error) {
 		text = append(text,
 			[]byte("# "+cmd.Description+"\n")...)
 		var cmdPath string
-		current := cmd.parent
+		current := cmd.Parent
 		for current != nil {
 			if current.Name != "" {
 				cmdPath = current.Name + "."
 			}
-			current = current.parent
+			current = current.Parent
 		}
 		text = append(text,
 			[]byte("["+cmdPath+cmd.Name+"]"+"\n")...)

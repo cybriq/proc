@@ -38,3 +38,5 @@ type Option interface {
 	Type() (t meta.Type)
 	Meta() (md meta.Metadata)
 }
+
+type Opts map[string]Option
