@@ -36,8 +36,7 @@ type Metadata struct {
 	Typ           Type
 }
 
-// New loads Data into a Metadata. Implementing types need to populate the
-// Data.Type field before calling this function
+// New loads Data into a Metadata.
 func New(d Data, t Type) Metadata {
 	return Metadata{
 		func() []string { return d.Aliases },
