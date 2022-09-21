@@ -5,6 +5,7 @@ import (
 	"encoding/base32"
 	"fmt"
 	"runtime"
+	"sort"
 	"strings"
 	"testing"
 
@@ -17,6 +18,7 @@ import (
 	"github.com/cybriq/proc/pkg/opts/meta"
 	"github.com/cybriq/proc/pkg/opts/text"
 	"github.com/cybriq/proc/pkg/opts/toggle"
+	"github.com/naoina/toml"
 )
 
 func TestCommand_Foreach(t *testing.T) {
@@ -45,6 +47,29 @@ func TestCommand_MarshalText(t *testing.T) {
 		t.FailNow()
 	}
 	log.I.Ln("\n" + string(conf))
+}
+
+func TestCommand_UnmarshalText(t *testing.T) {
+	log2.SetLogLevel(log2.Info)
+	o := Init(GetCommands())
+	var conf []byte
+	var err error
+	conf, err = o.MarshalText()
+	if log.E.Chk(err) {
+		t.FailNow()
+	}
+	// log.I.Ln(string(conf))
+	err = o.UnmarshalText(conf)
+	if log.E.Chk(err) {
+		t.FailNow()
+	}
+	var out interface{}
+	err = toml.Unmarshal(conf, &out)
+	oo := walk([]string{}, out, []Entry{})
+	sort.Sort(oo)
+	for i := range oo {
+		fmt.Println(oo[i])
+	}
 }
 
 // GetCommands returns available subcommands in Parallelcoin Pod

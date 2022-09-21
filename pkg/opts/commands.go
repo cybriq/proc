@@ -2,12 +2,14 @@ package opts
 
 import (
 	"encoding"
+	"fmt"
 	"sort"
 	"strings"
 	"sync"
 
 	"github.com/cybriq/proc/pkg/opts/config"
 	"github.com/cybriq/proc/pkg/opts/meta"
+	"github.com/naoina/toml"
 )
 
 type Op func(c interface{}) error
@@ -132,10 +134,10 @@ func (c *Command) MarshalText() (text []byte, err error) {
 			lq, rq := "", ""
 			st := cmd.Configs[i].String()
 			df := md.Default()
-			switch {
-			case cmd.Configs[i].Type() == meta.Text:
+			switch cmd.Configs[i].Type() {
+			case meta.Duration, meta.Text:
 				lq, rq = "\"", "\""
-			case cmd.Configs[i].Type() == meta.List:
+			case meta.List:
 				lq, rq = "[ \"", "\" ]"
 				st = strings.ReplaceAll(st, ",", "\", \"")
 				df = strings.ReplaceAll(df, ",", "\", \"")
@@ -152,5 +154,73 @@ func (c *Command) MarshalText() (text []byte, err error) {
 		text = append(text, []byte("\n")...)
 		return true
 	}, 0, 0, c)
+	return
+}
+
+func (c *Command) UnmarshalText(text []byte) (err error) {
+	var out interface{}
+	err = toml.Unmarshal(text, &out)
+	// log.I.S(out)
+	o := walk([]string{}, out, []Entry{})
+	// log.I.Ln(o)
+	_ = o
+	return
+}
+
+type Path []string
+
+func (p Path) String() string {
+	return strings.Join(p, "/")
+}
+
+type Entry struct {
+	path  Path
+	name  string
+	value interface{}
+}
+
+func (e Entry) String() string {
+	return fmt.Sprint(e.path, "/", e.name, "=", e.value)
+}
+
+type Entries []Entry
+
+func (e Entries) Len() int {
+	return len(e)
+}
+
+func (e Entries) Less(i, j int) bool {
+	iPath, jPath := e[i].String(), e[j].String()
+	return iPath < jPath
+}
+
+func (e Entries) Swap(i, j int) {
+	e[i], e[j] = e[j], e[i]
+}
+
+func walk(p []string, v interface{}, in Entries) (o Entries) {
+	o = append(o, in...)
+	var parent []string
+	for i := range p {
+		parent = append(parent, p[i])
+	}
+	// log.I.Ln(p, parent)
+	switch vv := v.(type) {
+	case map[string]interface{}:
+		for i := range vv {
+			// log.I.Ln(reflect.TypeOf(vv[i]))
+			switch vvv := vv[i].(type) {
+			case map[string]interface{}:
+				o = walk(append(parent, i), vvv, o)
+			default:
+				o = append(o, Entry{
+					path:  parent,
+					name:  i,
+					value: vv[i],
+				})
+
+			}
+		}
+	}
 	return
 }
