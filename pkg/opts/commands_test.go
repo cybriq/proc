@@ -5,7 +5,6 @@ import (
 	"encoding/base32"
 	"fmt"
 	"runtime"
-	"sort"
 	"strings"
 	"testing"
 
@@ -18,7 +17,6 @@ import (
 	"github.com/cybriq/proc/pkg/opts/meta"
 	"github.com/cybriq/proc/pkg/opts/text"
 	"github.com/cybriq/proc/pkg/opts/toggle"
-	"github.com/naoina/toml"
 )
 
 func TestCommand_Foreach(t *testing.T) {
@@ -58,17 +56,9 @@ func TestCommand_UnmarshalText(t *testing.T) {
 	if log.E.Chk(err) {
 		t.FailNow()
 	}
-	// log.I.Ln(string(conf))
 	err = o.UnmarshalText(conf)
-	if log.E.Chk(err) {
+	if err != nil {
 		t.FailNow()
-	}
-	var out interface{}
-	err = toml.Unmarshal(conf, &out)
-	oo := walk([]string{}, out, []Entry{})
-	sort.Sort(oo)
-	for i := range oo {
-		fmt.Println(oo[i])
 	}
 }
 

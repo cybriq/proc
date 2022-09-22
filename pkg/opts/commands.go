@@ -6,9 +6,16 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
+	integer "github.com/cybriq/proc/pkg/opts/Integer"
 	"github.com/cybriq/proc/pkg/opts/config"
+	"github.com/cybriq/proc/pkg/opts/duration"
+	"github.com/cybriq/proc/pkg/opts/float"
+	"github.com/cybriq/proc/pkg/opts/list"
 	"github.com/cybriq/proc/pkg/opts/meta"
+	"github.com/cybriq/proc/pkg/opts/text"
+	"github.com/cybriq/proc/pkg/opts/toggle"
 	"github.com/naoina/toml"
 )
 
@@ -47,6 +54,98 @@ func Init(c *Command) *Command {
 		Init(c.Commands[i])
 	}
 	return c
+}
+
+type Path []string
+
+func (p Path) String() string {
+	return strings.Join(p, "/")
+}
+
+func (c *Command) GetOpt(path Path) (o config.Option) {
+	p := make([]string, len(path))
+	for i := range path {
+		p[i] = path[i]
+	}
+	// log.I.Ln("searching", c.Name, p)
+	switch {
+	case len(p) < 1:
+		// not found
+		return
+	case len(p) > 2:
+		// search subcommands
+		for i := range c.Commands {
+			// log.I.Ln(c.Commands[i].Name, p[1:])
+			if c.Commands[i].Name == p[1] {
+				return c.Commands[i].GetOpt(p[1:])
+			}
+		}
+	case len(p) == 2:
+		// check name matches path, search for config item
+		// log.I.Ln("maybe found", c.Name, p[0])
+		if c.Name == p[0] {
+			for i := range c.Configs {
+				// log.I.Ln("checking", i, p)
+				if i == p[1] {
+					// log.I.Ln("returning", i)
+					return c.Configs[i]
+				}
+			}
+		}
+	}
+	return nil
+}
+
+type Entry struct {
+	path  Path
+	name  string
+	value interface{}
+}
+
+func (e Entry) String() string {
+	return fmt.Sprint(e.path, "/", e.name, "=", e.value)
+}
+
+type Entries []Entry
+
+func (e Entries) Len() int {
+	return len(e)
+}
+
+func (e Entries) Less(i, j int) bool {
+	iPath, jPath := e[i].String(), e[j].String()
+	return iPath < jPath
+}
+
+func (e Entries) Swap(i, j int) {
+	e[i], e[j] = e[j], e[i]
+}
+
+func walk(p []string, v interface{}, in Entries) (o Entries) {
+	o = append(o, in...)
+	var parent []string
+	for i := range p {
+		parent = append(parent, p[i])
+	}
+	// log.I.Ln(p, parent)
+	switch vv := v.(type) {
+	case map[string]interface{}:
+		for i := range vv {
+			// log.I.Ln(reflect.TypeOf(vv[i]))
+			switch vvv := vv[i].(type) {
+			case map[string]interface{}:
+				o = walk(append(parent, i), vvv, o)
+			default:
+				o = append(o, Entry{
+					path:  append(parent, i),
+					name:  i,
+					value: vv[i],
+				})
+
+			}
+		}
+	}
+	return
 }
 
 func Cmd(name, desc, doc string, op Op, cfg map[string]config.Option,
@@ -157,70 +256,67 @@ func (c *Command) MarshalText() (text []byte, err error) {
 	return
 }
 
-func (c *Command) UnmarshalText(text []byte) (err error) {
+func (c *Command) UnmarshalText(t []byte) (err error) {
 	var out interface{}
-	err = toml.Unmarshal(text, &out)
-	// log.I.S(out)
-	o := walk([]string{}, out, []Entry{})
-	// log.I.Ln(o)
-	_ = o
-	return
-}
-
-type Path []string
-
-func (p Path) String() string {
-	return strings.Join(p, "/")
-}
-
-type Entry struct {
-	path  Path
-	name  string
-	value interface{}
-}
-
-func (e Entry) String() string {
-	return fmt.Sprint(e.path, "/", e.name, "=", e.value)
-}
-
-type Entries []Entry
-
-func (e Entries) Len() int {
-	return len(e)
-}
-
-func (e Entries) Less(i, j int) bool {
-	iPath, jPath := e[i].String(), e[j].String()
-	return iPath < jPath
-}
-
-func (e Entries) Swap(i, j int) {
-	e[i], e[j] = e[j], e[i]
-}
-
-func walk(p []string, v interface{}, in Entries) (o Entries) {
-	o = append(o, in...)
-	var parent []string
-	for i := range p {
-		parent = append(parent, p[i])
-	}
-	// log.I.Ln(p, parent)
-	switch vv := v.(type) {
-	case map[string]interface{}:
-		for i := range vv {
-			// log.I.Ln(reflect.TypeOf(vv[i]))
-			switch vvv := vv[i].(type) {
-			case map[string]interface{}:
-				o = walk(append(parent, i), vvv, o)
+	err = toml.Unmarshal(t, &out)
+	oo := walk([]string{}, out, []Entry{})
+	sort.Sort(oo)
+	for i := range oo {
+		op := c.GetOpt(oo[i].path)
+		if op != nil {
+			switch op.Type() {
+			case meta.Bool:
+				v := op.(*toggle.Opt)
+				nv, ok := oo[i].value.(bool)
+				if ok {
+					v.FromValue(nv)
+				}
+				log.T.Ln("setting value of", oo[i].path, "to", nv)
+			case meta.Duration:
+				v := op.(*duration.Opt)
+				nv, ok := oo[i].value.(time.Duration)
+				if ok {
+					v.FromValue(nv)
+				}
+				log.T.Ln("setting value of", oo[i].path, "to", nv)
+			case meta.Float:
+				v := op.(*float.Opt)
+				nv, ok := oo[i].value.(float64)
+				if ok {
+					v.FromValue(nv)
+				}
+				log.T.Ln("setting value of", oo[i].path, "to", nv)
+			case meta.Integer:
+				v := op.(*integer.Opt)
+				nv, ok := oo[i].value.(int64)
+				if ok {
+					v.FromValue(nv)
+				}
+				log.T.Ln("setting value of", oo[i].path, "to", nv)
+			case meta.List:
+				v := op.(*list.Opt)
+				nv, ok := oo[i].value.([]interface{})
+				var strings []string
+				for i := range nv {
+					strings = append(strings, nv[i].(string))
+				}
+				if ok {
+					v.FromValue(strings)
+				}
+				log.T.Ln("setting value of", oo[i].path, "to", nv)
+			case meta.Text:
+				v := op.(*text.Opt)
+				nv, ok := oo[i].value.(string)
+				if ok {
+					v.FromValue(nv)
+				}
+				log.T.Ln("setting value of", oo[i].path, "to", nv)
 			default:
-				o = append(o, Entry{
-					path:  parent,
-					name:  i,
-					value: vv[i],
-				})
-
+				log.E.Ln("option type unknown:", oo[i].path, op.Type())
 			}
+		} else {
+			log.E.Ln("option not found:", oo[i].path)
 		}
 	}
-	return
+	return nil
 }

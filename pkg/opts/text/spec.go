@@ -15,6 +15,8 @@ type Opt struct {
 	h []Hook
 }
 
+var _ config.Option = &Opt{}
+
 type Hook func(*Opt) error
 
 func New(m meta.Data, h ...Hook) (o *Opt) {
@@ -35,6 +37,11 @@ func (o *Opt) RunHooks() (e error) {
 		}
 	}
 	return
+}
+
+func (o *Opt) FromValue(v string) *Opt {
+	o.v.Store(v)
+	return o
 }
 
 func (o *Opt) FromString(s string) (e error) {
