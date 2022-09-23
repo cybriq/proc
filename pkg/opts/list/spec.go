@@ -12,6 +12,7 @@ import (
 type Opt struct {
 	m meta.Metadata
 	v atomic.Value
+	x atomic.Value
 	h []Hook
 }
 
@@ -56,6 +57,15 @@ func (o *Opt) String() (s string) {
 	return strings.Join(o.v.Load().([]string), ",")
 }
 
+func (o *Opt) Expanded() (s string) {
+	return o.String()
+}
+
+func (o *Opt) SetExpanded(s string) {
+	err := o.FromString(s)
+	log.E.Chk(err)
+}
+
 func (o *Opt) Value() (c config.Concrete) {
 	c = config.NewConcrete()
 	c.List = func() []string { return o.v.Load().([]string) }
@@ -73,7 +83,7 @@ func NormalizeNetworkAddress(defaultPort string,
 		a, e = normalize.Addresses(
 			o.v.Load().([]string), defaultPort, userOnly)
 		if !log.E.Chk(e) {
-			o.v.Store(a)
+			o.x.Store(a)
 		}
 		return
 	}
@@ -82,17 +92,17 @@ func NormalizeNetworkAddress(defaultPort string,
 // NormalizeFilesystemPath cleans a directory specification, expands the ~ home
 // folder shortcut, and if abs is set to true, returns the absolute path from
 // filesystem root
-func NormalizeFilesystemPath(abs bool) func(*Opt) error {
+func NormalizeFilesystemPath(abs bool, appName string) func(*Opt) error {
 	return func(o *Opt) (e error) {
 		strings := o.v.Load().([]string)
 		for i := range strings {
 			var cleaned string
-			cleaned, e = normalize.ResolvePath(strings[i], abs)
+			cleaned, e = normalize.ResolvePath(strings[i], appName, abs)
 			if !log.E.Chk(e) {
 				strings[i] = cleaned
 			}
 		}
-		o.v.Store(strings)
+		o.x.Store(strings)
 		return
 	}
 }

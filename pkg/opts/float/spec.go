@@ -60,6 +60,15 @@ func (o *Opt) String() (s string) {
 	return strconv.FormatFloat(o.v.Load(), 'f', -1, 64)
 }
 
+func (o *Opt) Expanded() (s string) {
+	return o.String()
+}
+
+func (o *Opt) SetExpanded(s string) {
+	err := o.FromString(s)
+	log.E.Chk(err)
+}
+
 func (o *Opt) Value() (c config.Concrete) {
 	c = config.NewConcrete()
 	c.Float = func() float64 { return o.v.Load() }

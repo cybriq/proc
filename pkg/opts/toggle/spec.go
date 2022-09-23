@@ -64,6 +64,15 @@ func (o *Opt) String() (s string) {
 	return strconv.FormatBool(o.v.Load())
 }
 
+func (o *Opt) Expanded() (s string) {
+	return o.String()
+}
+
+func (o *Opt) SetExpanded(s string) {
+	err := o.FromString(s)
+	log.E.Chk(err)
+}
+
 func (o *Opt) Value() (c config.Concrete) {
 	c = config.NewConcrete()
 	c.Bool = func() bool { return o.v.Load() }

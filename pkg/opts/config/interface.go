@@ -34,6 +34,8 @@ func NewConcrete() Concrete {
 type Option interface {
 	FromString(s string) (e error)
 	String() (s string)
+	Expanded() (s string)
+	SetExpanded(s string)
 	Value() (c Concrete)
 	Type() (t meta.Type)
 	Meta() (md meta.Metadata)

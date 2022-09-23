@@ -60,6 +60,15 @@ func (o *Opt) String() (s string) {
 	return strconv.FormatInt(o.v.Load(), 10)
 }
 
+func (o *Opt) Expanded() (s string) {
+	return o.String()
+}
+
+func (o *Opt) SetExpanded(s string) {
+	err := o.FromString(s)
+	log.E.Chk(err)
+}
+
 func (o *Opt) Value() (c config.Concrete) {
 	c = config.NewConcrete()
 	c.Integer = func() int64 { return o.v.Load() }
