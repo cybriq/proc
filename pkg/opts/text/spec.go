@@ -88,7 +88,7 @@ func NormalizeNetworkAddress(defaultPort string,
 
 // NormalizeFilesystemPath cleans a directory specification, expands the ~ home
 // folder shortcut, and if abs is set to true, returns the absolute path from
-// filesystem root
+// filesystem root.
 func NormalizeFilesystemPath(abs bool, appName string) func(*Opt) error {
 	return func(o *Opt) (e error) {
 		var cleaned string

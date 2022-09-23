@@ -9,7 +9,7 @@ import (
 	"github.com/cybriq/proc/pkg/appdata"
 )
 
-func ResolvePath(input, appname string, abs bool) (cleaned string, e error) {
+func ResolvePath(input, appName string, abs bool) (cleaned string, e error) {
 	if strings.HasPrefix(input, "~") {
 		homeDir := getHomeDir()
 		input = strings.Replace(input, "~", homeDir, 1)
@@ -19,10 +19,12 @@ func ResolvePath(input, appname string, abs bool) (cleaned string, e error) {
 		if cleaned, e = filepath.Abs(cleaned); log.E.Chk(e) {
 			return
 		}
-	} else {
 		// if the path is relative, either ./ or not starting with a / then
 		// we assume the path is relative to the app data directory
-		cleaned = filepath.Join(appdata.Dir(appname, false), cleaned)
+	} else if !strings.HasPrefix(string(os.PathSeparator), cleaned) ||
+		strings.HasPrefix("."+string(os.PathSeparator), cleaned) {
+
+		cleaned = filepath.Join(appdata.Dir(appName, false), cleaned)
 	}
 	return
 }
