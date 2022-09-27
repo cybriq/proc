@@ -64,7 +64,7 @@ func TestCommand_UnmarshalText(t *testing.T) {
 func TestCommand_ParseCLIArgs(t *testing.T) {
 	args1 := "/random/path/to/server_binary --cafile ~/some/cafile --LC=cn node -addrindex --BD 48h30s"
 	args1s := strings.Split(args1, " ")
-	log2.SetLogLevel(log2.Info)
+	log2.SetLogLevel(log2.Debug)
 	o := Init(GetCommands())
 	run, err := o.ParseCLIArgs(args1s)
 	if log.E.Chk(err) {
@@ -84,6 +84,13 @@ func TestCommand_ParseCLIArgs(t *testing.T) {
 	if err == nil {
 		t.FailNow()
 	}
+	args4 := "/random/path/to/server_binary --cafile ~/some/cafile --LC=cn"
+	args4s := strings.Split(args4, " ")
+	run, err = o.ParseCLIArgs(args4s)
+	if log.E.Chk(err) {
+		t.FailNow()
+	}
+
 }
 
 // GetCommands returns available subcommands in Parallelcoin Pod
@@ -91,7 +98,7 @@ func GetCommands() (c *Command) {
 	c = &Command{
 		Name:        "pod",
 		Description: "All in one everything for parallelcoin",
-		Default:     "node",
+		Default:     Tags("gui"),
 		Configs: config.Opts{
 			"AutoPorts": toggle.New(meta.Data{
 				Label:         "Automatic Ports",

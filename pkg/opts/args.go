@@ -51,7 +51,6 @@ func (c *Command) ParseCLIArgs(args []string) (run *Command, err error) {
 				depth++
 				current = current.Commands[i]
 				segments = append(segments, args[last:cursor])
-				// log.I.Ln(segments, cursor)
 				last = cursor
 				break
 			}
@@ -67,36 +66,35 @@ func (c *Command) ParseCLIArgs(args []string) (run *Command, err error) {
 	// command name, and all subsequent items until the next segment should be
 	// names found in the configs map.
 	for i := range segments {
-		log.I.Ln(i, segments[i], "'"+commands[i].Name+"'", commands[i].Description)
+		log.D.Ln(i, segments[i], "'"+commands[i].Name+"'", commands[i].Description)
 		if len(segments[i]) > 0 {
 			iArgs := segments[i][1:]
 			cmd := commands[i]
-			log.I.Ln(commands[i].Name, "args", iArgs)
+			log.D.Ln(commands[i].Name, "args", iArgs)
 			var cursor int
 			for cursor < len(iArgs) {
 				inc := 1
 				arg := iArgs[cursor]
-				log.I.Ln("evaluating", arg)
+				log.D.Ln("evaluating", arg)
 				if strings.HasPrefix(arg, "-") {
 					arg = arg[1:]
 					if strings.HasPrefix(arg, "-") {
 						arg = arg[1:]
 					}
 					if strings.Contains(arg, "=") {
-						log.I.Ln("value in arg", arg)
+						log.D.Ln("value in arg", arg)
 						split := strings.Split(arg, "=")
 						if len(split) > 2 {
 							split = append(split[:1], strings.Join(split[1:], "="))
 						}
-						log.I.Ln(split)
+						log.D.Ln(split)
 						for cfgName := range cmd.Configs {
 							aliases := cmd.Configs[cfgName].Meta().Aliases()
-							// log.I.Ln(cfgName, aliases)
 							names := append(
 								[]string{cfgName}, aliases...)
 							for _, name := range names {
 								if normalise(name) == normalise(split[0]) {
-									log.I.F("assigning value '%s' to %s",
+									log.D.F("assigning value '%s' to %s",
 										split[0], split[1])
 									err = cmd.Configs[cfgName].FromString(split[1])
 									if log.E.Chk(err) {
@@ -124,14 +122,14 @@ func (c *Command) ParseCLIArgs(args []string) (run *Command, err error) {
 											// simply assign true and increment
 											// only 1 to cursor
 											if err != nil {
-												log.I.Chk(err)
+												log.D.Chk(err)
 												found = true
-												log.I.F("assigned value 'true' to %s",
+												log.D.F("assigned value 'true' to %s",
 													cfgName)
 												break second
 											}
 										}
-										log.I.F("assigning value '%s' to %s",
+										log.D.F("assigning value '%s' to %s",
 											iArgs[cursor+1], cfgName)
 										err = cmd.Configs[cfgName].
 											FromString(iArgs[cursor+1])
@@ -173,6 +171,26 @@ func (c *Command) ParseCLIArgs(args []string) (run *Command, err error) {
 			}
 		}
 	}
+	// if no Command was found, return the default. If there is no default, the
+	// top level Command will be returned
+	if len(c.Default) > 0 && len(segments) < 2 {
+		run = c
+		def := c.Default
+		var lastFound int
+		for i := range def {
+			for _, sc := range run.Commands {
+				if sc.Name == def[i] {
+					lastFound = i
+					run = sc
+				}
+			}
+		}
+		if lastFound != len(def)-1 {
+			err = fmt.Errorf("default command %v not found at %s", c.Default,
+				def)
+		}
+	}
+	log.D.F("will be executing command '%s'", run.Name)
 
 	return
 }

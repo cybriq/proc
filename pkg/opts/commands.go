@@ -35,7 +35,7 @@ type Command struct {
 	Parent        *Command
 	Commands      Commands
 	Configs       config.Opts
-	Default       string // specifies default subcommand to execute
+	Default       []string // specifies default subcommand to execute
 	sync.Mutex
 }
 
