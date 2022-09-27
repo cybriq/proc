@@ -1,6 +1,11 @@
 package opts
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/cybriq/proc/pkg/opts/meta"
+)
 
 // ParseCLIArgs reads a command line argument slice (presumably from
 // os.Args), identifies the command to run and returns a list of Entry
@@ -28,12 +33,9 @@ import "strings"
 //   can optionally be used for subcommands as well, though it is unlikely
 //   needed, if found, the Default of the tip of the Command branch
 //   selected by the CLI if there is one, otherwise the Command itself.
-func (c *Command) ParseCLIArgs(args []string) (run *Command,
-	entries []Entry, err error) {
-
-	log.I.Ln(args)
-
+func (c *Command) ParseCLIArgs(args []string) (run *Command, err error) {
 	var segments [][]string
+	commands := Commands{c}
 	var depth, last, cursor int
 	var done bool
 	current := c
@@ -41,20 +43,22 @@ func (c *Command) ParseCLIArgs(args []string) (run *Command,
 	// where relevant config items will be found.
 	for !done {
 		for i := range current.Commands {
-			// log.I.Ln(current.Commands[i])
 			if normalise(args[cursor]) == normalise(current.Commands[i].Name) {
-				log.I.Ln(args[cursor], normalise(current.Commands[i].Name))
+				// the command to run is the last, so update each new command
+				// found
+				run = current.Commands[i]
+				commands = append(commands, run)
 				depth++
 				current = current.Commands[i]
 				segments = append(segments, args[last:cursor])
-				log.I.Ln(segments, cursor)
+				// log.I.Ln(segments, cursor)
 				last = cursor
 				break
 			}
 		}
 		cursor++
-		if cursor >= len(args) {
-			log.I.Ln(len(args), cursor)
+		// append the remainder to the last segment
+		if cursor == len(args) {
 			segments = append(segments, args[last:cursor])
 			done = true
 		}
@@ -63,9 +67,113 @@ func (c *Command) ParseCLIArgs(args []string) (run *Command,
 	// command name, and all subsequent items until the next segment should be
 	// names found in the configs map.
 	for i := range segments {
-
-		log.I.Ln(i, segments[i])
+		log.I.Ln(i, segments[i], "'"+commands[i].Name+"'", commands[i].Description)
+		if len(segments[i]) > 0 {
+			iArgs := segments[i][1:]
+			cmd := commands[i]
+			log.I.Ln(commands[i].Name, "args", iArgs)
+			var cursor int
+			for cursor < len(iArgs) {
+				inc := 1
+				arg := iArgs[cursor]
+				log.I.Ln("evaluating", arg)
+				if strings.HasPrefix(arg, "-") {
+					arg = arg[1:]
+					if strings.HasPrefix(arg, "-") {
+						arg = arg[1:]
+					}
+					if strings.Contains(arg, "=") {
+						log.I.Ln("value in arg", arg)
+						split := strings.Split(arg, "=")
+						if len(split) > 2 {
+							split = append(split[:1], strings.Join(split[1:], "="))
+						}
+						log.I.Ln(split)
+						for cfgName := range cmd.Configs {
+							aliases := cmd.Configs[cfgName].Meta().Aliases()
+							// log.I.Ln(cfgName, aliases)
+							names := append(
+								[]string{cfgName}, aliases...)
+							for _, name := range names {
+								if normalise(name) == normalise(split[0]) {
+									log.I.F("assigning value '%s' to %s",
+										split[0], split[1])
+									err = cmd.Configs[cfgName].FromString(split[1])
+									if log.E.Chk(err) {
+										return
+									}
+								}
+							}
+						}
+					} else {
+						if len(iArgs) > cursor {
+							found := false
+							for cfgName := range cmd.Configs {
+								aliases := cmd.Configs[cfgName].Meta().Aliases()
+								names := append(
+									[]string{cfgName}, aliases...)
+							second:
+								for _, name := range names {
+									if normalise(name) == normalise(arg) {
+										// check for booleans, which can only be
+										// followed by true or false
+										if cmd.Configs[cfgName].Type() == meta.Bool {
+											err = cmd.Configs[cfgName].
+												FromString(iArgs[cursor+1])
+											// next value is not a truth value,
+											// simply assign true and increment
+											// only 1 to cursor
+											if err != nil {
+												log.I.Chk(err)
+												found = true
+												log.I.F("assigned value 'true' to %s",
+													cfgName)
+												break second
+											}
+										}
+										log.I.F("assigning value '%s' to %s",
+											iArgs[cursor+1], cfgName)
+										err = cmd.Configs[cfgName].
+											FromString(iArgs[cursor+1])
+										if log.E.Chk(err) {
+											return
+										}
+										inc++
+										found = true
+									}
+								}
+							}
+							if !found {
+								err = fmt.Errorf(
+									"option not found: '%s' context %v",
+									arg, iArgs)
+								return
+							}
+							// if this is the last arg, and it's bool, the
+							// implied value is true
+						} else if cmd.Configs[arg].Type() == meta.Bool {
+							err = cmd.Configs[arg].FromString("true")
+							if log.E.Chk(err) {
+								return
+							}
+						} else {
+							err = fmt.Errorf("argument '%s' missing value:"+
+								"context %v", arg, iArgs)
+							log.E.Chk(err)
+							return
+						}
+					}
+				} else {
+					err = fmt.Errorf("argument %s missing '-', context %s, "+
+						"most likely misspelled subcommand", arg, iArgs)
+					log.E.Chk(err)
+					return
+				}
+				cursor += inc
+			}
+		}
 	}
+
 	return
 }
 
