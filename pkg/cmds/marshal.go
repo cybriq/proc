@@ -1,4 +1,4 @@
-package opts
+package cmds
 
 import (
 	"encoding"
@@ -48,11 +48,9 @@ func walk(p []string, v interface{}, in Entries) (o Entries) {
 	for i := range p {
 		parent = append(parent, p[i])
 	}
-	// log.I.Ln(p, parent)
 	switch vv := v.(type) {
 	case map[string]interface{}:
 		for i := range vv {
-			// log.I.Ln(reflect.TypeOf(vv[i]))
 			switch vvv := vv[i].(type) {
 			case map[string]interface{}:
 				o = walk(append(parent, i), vvv, o)

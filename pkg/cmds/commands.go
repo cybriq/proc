@@ -1,4 +1,4 @@
-package opts
+package cmds
 
 import (
 	"fmt"
@@ -133,8 +133,8 @@ func (c *Command) GetOpt(path Path) (o config.Option) {
 	return nil
 }
 
-// Cmd is a convenience function but probably unnecessary when named sparse
-// struct literals are just as convenient.
+// Cmd is a convenience function but probably unnecessary when named field
+// sparse struct literals are just as convenient.
 func Cmd(name, desc, doc string, op Op, cfg map[string]config.Option,
 	cmds ...*Command) (c *Command) {
 

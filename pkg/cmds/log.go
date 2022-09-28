@@ -1,4 +1,4 @@
-package opts
+package cmds
 
 import (
 	"github.com/cybriq/proc"

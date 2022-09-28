@@ -1,4 +1,4 @@
-package opts
+package cmds
 
 import (
 	"fmt"
@@ -8,9 +8,7 @@ import (
 )
 
 // ParseCLIArgs reads a command line argument slice (presumably from
-// os.Args), identifies the command to run and returns a list of Entry
-// values that should be overlaid last after default,
-// config and environment variables are parsed.
+// os.Args), identifies the command to run and
 //
 // Rules for constructing CLI args:
 //

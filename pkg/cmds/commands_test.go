@@ -1,4 +1,4 @@
-package opts
+package cmds
 
 import (
 	"crypto/rand"
@@ -61,6 +61,7 @@ func TestCommand_UnmarshalText(t *testing.T) {
 		t.FailNow()
 	}
 }
+
 func TestCommand_ParseCLIArgs(t *testing.T) {
 	args1 := "/random/path/to/server_binary --cafile ~/some/cafile --LC=cn node -addrindex --BD 48h30s"
 	args1s := strings.Split(args1, " ")
@@ -90,7 +91,23 @@ func TestCommand_ParseCLIArgs(t *testing.T) {
 	if log.E.Chk(err) {
 		t.FailNow()
 	}
+}
 
+func TestCommand_GetEnvs(t *testing.T) {
+	log2.SetLogLevel(log2.Info)
+	o := Init(GetCommands())
+	envs := o.GetEnvs()
+	var out []string
+	err := envs.ForEach(func(env string) error {
+		out = append(out, env)
+		return nil
+	})
+	for i := range out {
+		log.I.Ln(out[i])
+	}
+	if err != nil {
+		t.FailNow()
+	}
 }
 
 // GetCommands returns available subcommands in Parallelcoin Pod
