@@ -70,7 +70,7 @@ func walk(p []string, v interface{}, in Entries) (o Entries) {
 var _ encoding.TextMarshaler = &Command{}
 
 func (c *Command) MarshalText() (text []byte, err error) {
-	c.Foreach(func(cmd *Command, depth int) bool {
+	c.ForEach(func(cmd *Command, depth int) bool {
 		if cmd == nil {
 			log.I.Ln("cmd empty")
 			return true

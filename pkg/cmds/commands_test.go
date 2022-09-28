@@ -22,14 +22,14 @@ import (
 func TestCommand_Foreach(t *testing.T) {
 	cm := GetCommands()
 	log.I.Ln("spewing only droptxindex")
-	cm.Foreach(func(cmd *Command, _ int) bool {
+	cm.ForEach(func(cmd *Command, _ int) bool {
 		if cmd.Name == "droptxindex" {
 			log.I.S(cmd)
 		}
 		return true
 	}, 0, 0, cm)
 	log.I.Ln("printing name of all commands found on search")
-	cm.Foreach(func(cmd *Command, depth int) bool {
+	cm.ForEach(func(cmd *Command, depth int) bool {
 		log.I.Ln(strings.Repeat("\t", depth) + cmd.Name)
 		return true
 	}, 0, 0, cm)
@@ -38,7 +38,7 @@ func TestCommand_Foreach(t *testing.T) {
 func TestCommand_MarshalText(t *testing.T) {
 
 	log2.SetLogLevel(log2.Info)
-	o := Init(GetCommands())
+	_, o := Init(GetCommands())
 	// log.I.S(o)
 	conf, err := o.MarshalText()
 	if log.E.Chk(err) {
@@ -49,7 +49,7 @@ func TestCommand_MarshalText(t *testing.T) {
 
 func TestCommand_UnmarshalText(t *testing.T) {
 	log2.SetLogLevel(log2.Info)
-	o := Init(GetCommands())
+	_, o := Init(GetCommands())
 	var conf []byte
 	var err error
 	conf, err = o.MarshalText()
@@ -66,7 +66,7 @@ func TestCommand_ParseCLIArgs(t *testing.T) {
 	args1 := "/random/path/to/server_binary --cafile ~/some/cafile --LC=cn node -addrindex --BD 48h30s"
 	args1s := strings.Split(args1, " ")
 	log2.SetLogLevel(log2.Debug)
-	o := Init(GetCommands())
+	_, o := Init(GetCommands())
 	run, err := o.ParseCLIArgs(args1s)
 	if log.E.Chk(err) {
 		t.FailNow()
@@ -95,22 +95,24 @@ func TestCommand_ParseCLIArgs(t *testing.T) {
 
 func TestCommand_GetEnvs(t *testing.T) {
 	log2.SetLogLevel(log2.Info)
-	o := Init(GetCommands())
+	_, o := Init(GetCommands())
 	envs := o.GetEnvs()
 	var out []string
-	err := envs.ForEach(func(env string) error {
+	err := envs.ForEach(func(env string, opt config.Option) error {
 		out = append(out, env)
 		return nil
 	})
-	for i := range out {
-		log.I.Ln(out[i])
-	}
+	// for i := range out { // verifying ordering groups subcommands
+	// 	log.I.Ln(out[i])
+	// }
 	if err != nil {
 		t.FailNow()
 	}
 }
 
-// GetCommands returns available subcommands in Parallelcoin Pod
+// GetCommands returns available subcommands in hypothetical Parallelcoin
+// Pod example for testing (derived from btcd and btcwallet plus
+// parallelcoin kopach miner)
 func GetCommands() (c *Command) {
 	c = &Command{
 		Name:        "pod",

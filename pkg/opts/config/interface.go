@@ -39,6 +39,7 @@ type Option interface {
 	Value() (c Concrete)
 	Type() (t meta.Type)
 	Meta() (md meta.Metadata)
+	RunHooks() (err error)
 }
 
 type Opts map[string]Option

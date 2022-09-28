@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	"os"
 	"sort"
 	"strings"
 
@@ -14,17 +15,31 @@ type Env struct {
 
 type Envs []Env
 
-func (e Envs) ForEach(fn func(env string) (err error)) (err error) {
+func (e Envs) ForEach(fn func(env string, opt config.Option) (err error)) (err error) {
 	for i := range e {
 		var name []string
 		for j := range e[i].Name {
 			name = append(name, strings.ToUpper(e[i].Name[j]))
 		}
-		err = fn(strings.Join(name, "_"))
+		err = fn(strings.Join(name, "_"), nil)
 		if err != nil {
 			return
 		}
 	}
+	return
+}
+
+func (e Envs) LoadFromEnvironment() (err error) {
+	err = e.ForEach(func(env string, opt config.Option) (err error) {
+		v, exists := os.LookupEnv(env)
+		if exists {
+			err = opt.FromString(v)
+			if log.D.Chk(err) {
+				return err
+			}
+		}
+		return
+	})
 	return
 }
 

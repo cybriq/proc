@@ -90,18 +90,30 @@ func GetConfigBase(in config.Opts, appName string, abs bool) {
 	}
 }
 
-func Init(c *Command) *Command {
+func Init(c *Command) (err error, cmd *Command) {
 	if c.Parent != nil {
 		log.T.Ln("backlinking children of", c.Parent.Name)
 	}
 	if c.Entrypoint == nil {
 		c.Entrypoint = NoOp
 	}
+	for i := range c.Configs {
+		_ = i
+	}
 	for i := range c.Commands {
 		c.Commands[i].Parent = c
 		Init(c.Commands[i])
 	}
-	return c
+	c.ForEach(func(cmd *Command, _ int) bool {
+		for i := range cmd.Configs {
+			err := cmd.Configs[i].RunHooks()
+			if log.E.Chk(err) {
+				return false
+			}
+		}
+		return true
+	}, 0, 0, c)
+	return err, c
 }
 
 func (c *Command) GetOpt(path Path) (o config.Option) {
@@ -153,11 +165,11 @@ func getIndent(d int) string {
 	return strings.Repeat("\t", d)
 }
 
-// Foreach runs a closure on every node in the Commands tree, stopping if the
+// ForEach runs a closure on every node in the Commands tree, stopping if the
 // closure returns false
-func (c *Command) Foreach(cl func(*Command, int) bool, hereDepth, hereDist int,
-	cmd *Command) (ocl func(*Command, int) bool, depth, dist int,
-	cm *Command) {
+func (c *Command) ForEach(cl func(*Command, int) bool, hereDepth,
+	hereDist int, cmd *Command) (ocl func(*Command, int) bool, depth,
+	dist int, cm *Command) {
 	ocl = cl
 	cm = cmd
 	if hereDepth == 0 {
@@ -175,7 +187,7 @@ func (c *Command) Foreach(cl func(*Command, int) bool, hereDepth, hereDist int,
 			return
 		}
 		dist++
-		ocl, depth, dist, cm = c.Commands[i].Foreach(
+		ocl, depth, dist, cm = c.Commands[i].ForEach(
 			cl,
 			depth,
 			dist,
