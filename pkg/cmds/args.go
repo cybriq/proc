@@ -31,7 +31,9 @@ import (
 //   can optionally be used for subcommands as well, though it is unlikely
 //   needed, if found, the Default of the tip of the Command branch
 //   selected by the CLI if there is one, otherwise the Command itself.
-func (c *Command) ParseCLIArgs(args []string) (run *Command, err error) {
+func (c *Command) ParseCLIArgs(a []string) (run *Command, err error) {
+	args := make([]string, len(a))
+
 	var segments [][]string
 	commands := Commands{c}
 	var depth, last, cursor int

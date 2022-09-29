@@ -1,17 +1,42 @@
 package app
 
-import "github.com/cybriq/proc/pkg/cmds"
+import (
+	"os"
+
+	"github.com/cybriq/proc/pkg/cmds"
+)
 
 type App struct {
-	cmds.Command
+	*cmds.Command
+	launch *cmds.Command
 	cmds.Envs
 }
 
-func New(cmd *cmds.Command) (a App) {
+func New(cmd *cmds.Command) (a *App, err error) {
 	cmds.GetConfigBase(cmd.Configs, cmd.Name, false)
-	_, cmd = cmds.Init(cmd)
-	cfgFile := cmd.GetOpt(cmds.Path{cmd.Name, "ConfigFile"})
-	// cfgFile.SetExpanded(cfgFile)
-	_ = cfgFile.Expanded()
+	a.Command = cmd
+	// We first parse the CLI args, in case config file location has been
+	// specified
+	if a.launch, err = a.Command.ParseCLIArgs(os.Args); log.E.Chk(err) {
+		return
+	}
+	if err = cmd.LoadConfig(); log.E.Chk(err) {
+		return
+	}
+	a.Command, err = cmds.Init(cmd)
+	a.Envs = cmd.GetEnvs()
+	if err = a.Envs.LoadFromEnvironment(); log.E.Chk(err) {
+		return
+	}
+	// This is done again, to ensure the effect of CLI args take precedence
+	if a.launch, err = a.Command.ParseCLIArgs(os.Args); log.E.Chk(err) {
+		return
+	}
+	return
+}
+
+func (a *App) Launch(state interface{}) (err error) {
+	err = a.launch.Entrypoint(state)
+	log.E.Chk(err)
 	return
 }

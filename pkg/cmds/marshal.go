@@ -3,6 +3,8 @@ package cmds
 import (
 	"encoding"
 	"fmt"
+	"io"
+	"os"
 	"sort"
 	"strings"
 	"time"
@@ -190,4 +192,16 @@ func (c *Command) UnmarshalText(t []byte) (err error) {
 		}
 	}
 	return nil
+}
+func (c *Command) LoadConfig() (err error) {
+	cfgFile := c.GetOpt(Path{c.Name, "ConfigFile"})
+	var file io.Reader
+	file, err = os.Open(cfgFile.Expanded())
+	var all []byte
+	all, err = io.ReadAll(file)
+	err = c.UnmarshalText(all)
+	if log.E.Chk(err) {
+		return
+	}
+	return
 }

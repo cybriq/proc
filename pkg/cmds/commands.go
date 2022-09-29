@@ -90,7 +90,7 @@ func GetConfigBase(in config.Opts, appName string, abs bool) {
 	}
 }
 
-func Init(c *Command) (err error, cmd *Command) {
+func Init(c *Command) (cmd *Command, err error) {
 	if c.Parent != nil {
 		log.T.Ln("backlinking children of", c.Parent.Name)
 	}
@@ -113,7 +113,7 @@ func Init(c *Command) (err error, cmd *Command) {
 		}
 		return true
 	}, 0, 0, c)
-	return err, c
+	return c, err
 }
 
 func (c *Command) GetOpt(path Path) (o config.Option) {
