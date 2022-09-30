@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -196,12 +197,32 @@ func (c *Command) UnmarshalText(t []byte) (err error) {
 func (c *Command) LoadConfig() (err error) {
 	cfgFile := c.GetOpt(Path{c.Name, "ConfigFile"})
 	var file io.Reader
-	file, err = os.Open(cfgFile.Expanded())
-	var all []byte
-	all, err = io.ReadAll(file)
-	err = c.UnmarshalText(all)
-	if log.E.Chk(err) {
-		return
+	if file, err = os.Open(cfgFile.Expanded()); log.E.Chk(err) {
+		log.T.F("creating config file at path: '%s'", cfgFile.Expanded())
+		// If no config found, create data dir and drop the default in place
+		if err = os.MkdirAll(filepath.Base(cfgFile.Expanded()), 0600); log.E.Chk(err) {
+			return err
+		}
+		var f *os.File
+		f, err = os.OpenFile(cfgFile.Expanded(), os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666)
+		if log.E.Chk(err) {
+			return
+		}
+		var cf []byte
+		if cf, err = c.MarshalText(); log.E.Chk(err) {
+			return
+		}
+		var n int
+		if n, err = f.Write(cf); log.E.Chk(err) || n < 1 {
+			return
+		}
+	} else {
+		var all []byte
+		all, err = io.ReadAll(file)
+		err = c.UnmarshalText(all)
+		if log.E.Chk(err) {
+			return
+		}
 	}
 	return
 }

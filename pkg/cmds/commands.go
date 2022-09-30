@@ -56,7 +56,7 @@ func GetConfigBase(in config.Opts, appName string, abs bool) {
 	case "linux", "aix", "freebsd", "netbsd", "openbsd", "dragonfly":
 		defaultDataDir = fmt.Sprintf("~/.%s", appName)
 		defaultConfigFile =
-			fmt.Sprintf("~/.%s/%s", defaultDataDir, configFilename)
+			fmt.Sprintf("%s/%s", defaultDataDir, configFilename)
 	case "windows":
 		defaultDataDir = fmt.Sprintf("%%LOCALAPPDATA%%\\%s", appName)
 		defaultConfigFile =

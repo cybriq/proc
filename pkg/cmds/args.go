@@ -33,7 +33,9 @@ import (
 //   selected by the CLI if there is one, otherwise the Command itself.
 func (c *Command) ParseCLIArgs(a []string) (run *Command, err error) {
 	args := make([]string, len(a))
-
+	for i := range a {
+		args[i] = a[i]
+	}
 	var segments [][]string
 	commands := Commands{c}
 	var depth, last, cursor int
@@ -66,6 +68,9 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, err error) {
 	// command name, and all subsequent items until the next segment should be
 	// names found in the configs map.
 	for i := range segments {
+		for j := range segments[i] {
+			log.D.F("'%s'", segments[i][j])
+		}
 		log.D.Ln(i, segments[i], "'"+commands[i].Name+"'", commands[i].Description)
 		if len(segments[i]) > 0 {
 			iArgs := segments[i][1:]

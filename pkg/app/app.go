@@ -1,8 +1,6 @@
 package app
 
 import (
-	"os"
-
 	"github.com/cybriq/proc/pkg/cmds"
 )
 
@@ -12,12 +10,12 @@ type App struct {
 	cmds.Envs
 }
 
-func New(cmd *cmds.Command) (a *App, err error) {
+func New(cmd *cmds.Command, args []string) (a *App, err error) {
 	cmds.GetConfigBase(cmd.Configs, cmd.Name, false)
-	a.Command = cmd
+	a = &App{Command: cmd}
 	// We first parse the CLI args, in case config file location has been
 	// specified
-	if a.launch, err = a.Command.ParseCLIArgs(os.Args); log.E.Chk(err) {
+	if a.launch, err = a.Command.ParseCLIArgs(args); log.E.Chk(err) {
 		return
 	}
 	if err = cmd.LoadConfig(); log.E.Chk(err) {
@@ -29,7 +27,7 @@ func New(cmd *cmds.Command) (a *App, err error) {
 		return
 	}
 	// This is done again, to ensure the effect of CLI args take precedence
-	if a.launch, err = a.Command.ParseCLIArgs(os.Args); log.E.Chk(err) {
+	if a.launch, err = a.Command.ParseCLIArgs(args); log.E.Chk(err) {
 		return
 	}
 	return

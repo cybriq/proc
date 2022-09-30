@@ -309,6 +309,10 @@ func GetExampleCommands() (c *Command) {
 			{
 				Name:        "node",
 				Description: "ParallelCoin blockchain node",
+				Entrypoint: func(c interface{}) error {
+					log.I.Ln("running node")
+					return nil
+				},
 				Configs: config.Opts{
 					"AddCheckpoints": list.New(meta.Data{
 						Aliases:       Tags("AC"),

@@ -13,18 +13,20 @@ func ResolvePath(input, appName string, abs bool) (cleaned string, e error) {
 	if strings.HasPrefix(input, "~") {
 		homeDir := getHomeDir()
 		input = strings.Replace(input, "~", homeDir, 1)
-	}
-	cleaned = filepath.Clean(input)
-	if abs {
-		if cleaned, e = filepath.Abs(cleaned); log.E.Chk(e) {
-			return
-		}
-		// if the path is relative, either ./ or not starting with a / then
-		// we assume the path is relative to the app data directory
-	} else if !strings.HasPrefix(string(os.PathSeparator), cleaned) ||
-		strings.HasPrefix("."+string(os.PathSeparator), cleaned) {
+		cleaned = filepath.Clean(input)
+	} else {
 
-		cleaned = filepath.Join(appdata.Dir(appName, false), cleaned)
+		if abs {
+			if cleaned, e = filepath.Abs(cleaned); log.E.Chk(e) {
+				return
+			}
+			// if the path is relative, either ./ or not starting with a / then
+			// we assume the path is relative to the app data directory
+		} else if !strings.HasPrefix(string(os.PathSeparator), cleaned) ||
+			strings.HasPrefix("."+string(os.PathSeparator), cleaned) {
+
+			cleaned = filepath.Join(appdata.Dir(appName, false), cleaned)
+		}
 	}
 	return
 }
