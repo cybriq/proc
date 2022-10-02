@@ -10,28 +10,22 @@ import (
 	"github.com/cybriq/proc/pkg/opts/config"
 	"github.com/cybriq/proc/pkg/opts/meta"
 	"github.com/cybriq/proc/pkg/opts/text"
+	"github.com/cybriq/proc/pkg/path"
 )
-
-type Op func(c interface{}) error
 
 var NoOp = func(c interface{}) error { return nil }
 var Tags = func(s ...string) []string {
 	return s
 }
 
-type Path []string
-
-func (p Path) String() string {
-	return strings.Join(p, "/")
-}
-
 // Command is a specification for a command and can include any number of
 // subcommands, and for each Command a list of options
 type Command struct {
+	path.Path
 	Name          string
 	Description   string
 	Documentation string
-	Entrypoint    Op
+	Entrypoint    path.Op
 	Parent        *Command
 	Commands      Commands
 	Configs       config.Opts
@@ -90,19 +84,28 @@ func GetConfigBase(in config.Opts, appName string, abs bool) {
 	}
 }
 
-func Init(c *Command) (cmd *Command, err error) {
+// Init sets up a Command to be ready to use. Puts the reverse paths into the
+// tree structure, puts sane defaults into command launchers, runs the hooks on
+// all the defined configuration values, and sets the paths on each Command and
+// Option so that they can be directly interrogated for their location.
+func Init(c *Command, p path.Path) (cmd *Command, err error) {
 	if c.Parent != nil {
 		log.T.Ln("backlinking children of", c.Parent.Name)
 	}
 	if c.Entrypoint == nil {
 		c.Entrypoint = NoOp
 	}
+	if p == nil {
+		p = path.Path{c.Name}
+	}
+	c.Path = p // .Parent()
 	for i := range c.Configs {
-		_ = i
+		c.Configs[i].SetPath(p)
 	}
 	for i := range c.Commands {
 		c.Commands[i].Parent = c
-		Init(c.Commands[i])
+		c.Commands[i].Path = p.Child(c.Commands[i].Name)
+		_, _ = Init(c.Commands[i], p.Child(c.Commands[i].Name))
 	}
 	c.ForEach(func(cmd *Command, _ int) bool {
 		for i := range cmd.Configs {
@@ -116,7 +119,7 @@ func Init(c *Command) (cmd *Command, err error) {
 	return c, err
 }
 
-func (c *Command) GetOpt(path Path) (o config.Option) {
+func (c *Command) GetOpt(path path.Path) (o config.Option) {
 	p := make([]string, len(path))
 	for i := range path {
 		p[i] = path[i]
@@ -147,7 +150,7 @@ func (c *Command) GetOpt(path Path) (o config.Option) {
 
 // Cmd is a convenience function but probably unnecessary when named field
 // sparse struct literals are just as convenient.
-func Cmd(name, desc, doc string, op Op, cfg map[string]config.Option,
+func Cmd(name, desc, doc string, op path.Op, cfg map[string]config.Option,
 	cmds ...*Command) (c *Command) {
 
 	c = &Command{
@@ -159,10 +162,6 @@ func Cmd(name, desc, doc string, op Op, cfg map[string]config.Option,
 		Configs:       cfg,
 	}
 	return
-}
-
-func getIndent(d int) string {
-	return strings.Repeat("\t", d)
 }
 
 // ForEach runs a closure on every node in the Commands tree, stopping if the
@@ -178,12 +177,12 @@ func (c *Command) ForEach(cl func(*Command, int) bool, hereDepth,
 		}
 	}
 	depth = hereDepth + 1
-	log.T.Ln(getIndent(depth)+"->", depth)
+	log.T.Ln(path.GetIndent(depth)+"->", depth)
 	dist = hereDist
 	for i := range c.Commands {
-		log.T.Ln(getIndent(depth)+"walking", c.Commands[i].Name, depth,
+		log.T.Ln(path.GetIndent(depth)+"walking", c.Commands[i].Name, depth,
 			dist)
-		if !cl(c.Commands[i], hereDepth) {
+		if !cl(c.Commands[i], depth) {
 			return
 		}
 		dist++
@@ -194,7 +193,7 @@ func (c *Command) ForEach(cl func(*Command, int) bool, hereDepth,
 			cm,
 		)
 	}
-	log.T.Ln(getIndent(hereDepth)+"<-", hereDepth)
+	log.T.Ln(path.GetIndent(hereDepth)+"<-", hereDepth)
 	depth--
 	return
 }

@@ -17,11 +17,12 @@ import (
 	"github.com/cybriq/proc/pkg/opts/meta"
 	"github.com/cybriq/proc/pkg/opts/text"
 	"github.com/cybriq/proc/pkg/opts/toggle"
+	path2 "github.com/cybriq/proc/pkg/path"
 	"github.com/naoina/toml"
 )
 
 type Entry struct {
-	path  Path
+	path  path2.Path
 	name  string
 	value interface{}
 }
@@ -195,7 +196,7 @@ func (c *Command) UnmarshalText(t []byte) (err error) {
 	return nil
 }
 func (c *Command) LoadConfig() (err error) {
-	cfgFile := c.GetOpt(Path{c.Name, "ConfigFile"})
+	cfgFile := c.GetOpt(path2.Path{c.Name, "ConfigFile"})
 	var file io.Reader
 	if file, err = os.Open(cfgFile.Expanded()); log.E.Chk(err) {
 		log.T.F("creating config file at path: '%s'", cfgFile.Expanded())

@@ -6,15 +6,25 @@ import (
 	"strings"
 
 	"github.com/cybriq/proc/pkg/opts/config"
+	"github.com/cybriq/proc/pkg/path"
 	"go.uber.org/atomic"
 
 	"github.com/cybriq/proc/pkg/opts/meta"
 )
 
 type Opt struct {
+	p path.Path
 	m meta.Metadata
 	v atomic.Bool
 	h []Hook
+}
+
+func (o *Opt) Path() (p path.Path) {
+	return o.p
+}
+
+func (o *Opt) SetPath(p path.Path) {
+	o.p = p
 }
 
 var _ config.Option = &Opt{}

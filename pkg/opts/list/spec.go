@@ -6,10 +6,12 @@ import (
 	"github.com/cybriq/proc/pkg/opts/config"
 	"github.com/cybriq/proc/pkg/opts/meta"
 	"github.com/cybriq/proc/pkg/opts/normalize"
+	"github.com/cybriq/proc/pkg/path"
 	"go.uber.org/atomic"
 )
 
 type Opt struct {
+	p path.Path
 	m meta.Metadata
 	v atomic.Value
 	x atomic.Value
@@ -17,6 +19,14 @@ type Opt struct {
 }
 
 var _ config.Option = &Opt{}
+
+func (o *Opt) Path() (p path.Path) {
+	return o.p
+}
+
+func (o *Opt) SetPath(p path.Path) {
+	o.p = p
+}
 
 type Hook func(*Opt) error
 

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/cybriq/proc/pkg/opts/meta"
+	"github.com/cybriq/proc/pkg/path"
 )
 
 // Concrete is a struct of functions that return the concrete values. Only the
@@ -40,6 +41,8 @@ type Option interface {
 	Type() (t meta.Type)
 	Meta() (md meta.Metadata)
 	RunHooks() (err error)
+	Path() (p path.Path)
+	SetPath(p path.Path)
 }
 
 type Opts map[string]Option

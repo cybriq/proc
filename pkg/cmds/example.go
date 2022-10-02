@@ -786,7 +786,7 @@ func GetExampleCommands() (c *Command) {
 					},
 				},
 				Configs: config.Opts{
-					"WalletFile": text.New(meta.Data{
+					"File": text.New(meta.Data{
 						Aliases:       Tags("WF"),
 						Tags:          Tags("wallet"),
 						Label:         "Wallet File",
@@ -794,7 +794,7 @@ func GetExampleCommands() (c *Command) {
 						Documentation: "<placeholder for detailed documentation>",
 						Default:       "~/.pod/mainnet/wallet.db",
 					}),
-					"WalletPass": text.New(meta.Data{
+					"Pass": text.New(meta.Data{
 						Aliases: Tags("WPW"),
 						Label:   "Wallet Pass",
 						Tags:    Tags("wallet"),
@@ -803,14 +803,14 @@ func GetExampleCommands() (c *Command) {
 						Documentation: "<placeholder for detailed documentation>",
 						Default:       genPassword(),
 					}),
-					"WalletRPCListeners": list.New(meta.Data{
+					"RPCListeners": list.New(meta.Data{
 						Aliases:       Tags("WRL"),
 						Tags:          Tags("wallet"),
 						Label:         "Wallet RPC Listeners",
 						Description:   "addresses for wallet RPC server to listen on",
 						Documentation: "<placeholder for detailed documentation>",
 					}),
-					"WalletRPCMaxClients": integer.New(
+					"RPCMaxClients": integer.New(
 						meta.Data{
 							Aliases:       Tags("WRMC"),
 							Tags:          Tags("wallet"),
@@ -818,7 +818,7 @@ func GetExampleCommands() (c *Command) {
 							Description:   "maximum number of RPC clients allowed for wallet RPC",
 							Documentation: "<placeholder for detailed documentation>",
 						}),
-					"WalletRPCMaxWebsockets": integer.New(meta.Data{
+					"RPCMaxWebsockets": integer.New(meta.Data{
 						Aliases:       Tags("WRMWS"),
 						Tags:          Tags("wallet"),
 						Label:         "Legacy RPC Max Websockets",
@@ -826,7 +826,7 @@ func GetExampleCommands() (c *Command) {
 						Documentation: "<placeholder for detailed documentation>",
 						Default:       "25",
 					}),
-					"WalletServer": text.New(meta.Data{
+					"Server": text.New(meta.Data{
 						Aliases:       Tags("WS"),
 						Tags:          Tags("wallet"),
 						Label:         "Wallet Server",

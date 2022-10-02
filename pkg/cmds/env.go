@@ -6,10 +6,11 @@ import (
 	"strings"
 
 	"github.com/cybriq/proc/pkg/opts/config"
+	"github.com/cybriq/proc/pkg/path"
 )
 
 type Env struct {
-	Name Path
+	Name path.Path
 	Opt  config.Option
 }
 

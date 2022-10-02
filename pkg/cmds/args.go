@@ -100,7 +100,7 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, err error) {
 							for _, name := range names {
 								if normalise(name) == normalise(split[0]) {
 									log.D.F("assigning value '%s' to %s",
-										split[0], split[1])
+										split[1], split[0])
 									err = cmd.Configs[cfgName].FromString(split[1])
 									if log.E.Chk(err) {
 										return
@@ -115,7 +115,6 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, err error) {
 								aliases := cmd.Configs[cfgName].Meta().Aliases()
 								names := append(
 									[]string{cfgName}, aliases...)
-							second:
 								for _, name := range names {
 									if normalise(name) == normalise(arg) {
 										// check for booleans, which can only be
@@ -131,7 +130,7 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, err error) {
 												found = true
 												log.D.F("assigned value 'true' to %s",
 													cfgName)
-												break second
+												break
 											}
 										}
 										log.D.F("assigning value '%s' to %s",
