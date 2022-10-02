@@ -33,14 +33,19 @@ import (
 //   selected by the CLI if there is one, otherwise the Command itself.
 func (c *Command) ParseCLIArgs(a []string) (run *Command, err error) {
 	args := make([]string, len(a))
+	var cursor int
 	for i := range a {
-		args[i] = a[i]
+		if len(a[i]) > 0 {
+			args[cursor] = a[i]
+			cursor++
+		}
 	}
 	var segments [][]string
 	commands := Commands{c}
-	var depth, last, cursor int
+	var depth, last int
 	var done bool
 	current := c
+	cursor = 0
 	// First pass matches Command names in order to slice up the sections
 	// where relevant config items will be found.
 	for !done {
@@ -60,7 +65,13 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, err error) {
 		cursor++
 		// append the remainder to the last segment
 		if cursor == len(args) {
-			segments = append(segments, args[last:cursor])
+			var tmp []string
+			for _, item := range args[last:cursor] {
+				if len(item) > 0 {
+					tmp = append(tmp, item)
+				}
+			}
+			segments = append(segments, tmp)
 			done = true
 		}
 	}
@@ -68,10 +79,6 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, err error) {
 	// command name, and all subsequent items until the next segment should be
 	// names found in the configs map.
 	for i := range segments {
-		for j := range segments[i] {
-			log.D.F("'%s'", segments[i][j])
-		}
-		log.D.Ln(i, segments[i], "'"+commands[i].Name+"'", commands[i].Description)
 		if len(segments[i]) > 0 {
 			iArgs := segments[i][1:]
 			cmd := commands[i]
@@ -80,7 +87,11 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, err error) {
 			for cursor < len(iArgs) {
 				inc := 1
 				arg := iArgs[cursor]
-				log.D.Ln("evaluating", arg)
+				if len(arg) == 0 {
+					cursor++
+					continue
+				}
+				log.D.Ln("evaluating", arg, iArgs[cursor:])
 				if strings.HasPrefix(arg, "-") {
 					arg = arg[1:]
 					if strings.HasPrefix(arg, "-") {
@@ -92,7 +103,6 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, err error) {
 						if len(split) > 2 {
 							split = append(split[:1], strings.Join(split[1:], "="))
 						}
-						log.D.Ln(split)
 						for cfgName := range cmd.Configs {
 							aliases := cmd.Configs[cfgName].Meta().Aliases()
 							names := append(
@@ -148,7 +158,7 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, err error) {
 							if !found {
 								err = fmt.Errorf(
 									"option not found: '%s' context %v",
-									arg, iArgs)
+									arg, segments[i])
 								return
 							}
 							// if this is the last arg, and it's bool, the

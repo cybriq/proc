@@ -68,7 +68,7 @@ func TestCommand_ParseCLIArgs(t *testing.T) {
 		t.FailNow()
 	}
 	_, _ = run, err
-	args2 := "node -addrindex --BD=48h30s dropaddrindex"
+	args2 := "/random/path/to/server_binary node -addrindex --BD=48h30s  -RPCMaxConcurrentReqs -16 dropaddrindex "
 	args2s := strings.Split(args2, " ")
 	run, err = o.ParseCLIArgs(args2s)
 	if log.E.Chk(err) {
