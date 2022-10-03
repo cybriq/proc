@@ -18,7 +18,7 @@ func New(cmd *cmds.Command, args []string) (a *App, err error) {
 	a = &App{Command: cmd}
 	// We first parse the CLI args, in case config file location has been
 	// specified
-	if a.launch, err = a.Command.ParseCLIArgs(args); log.E.Chk(err) {
+	if a.launch, _, err = a.Command.ParseCLIArgs(args); log.E.Chk(err) {
 		return
 	}
 	if err = cmd.LoadConfig(); log.E.Chk(err) {
@@ -30,14 +30,14 @@ func New(cmd *cmds.Command, args []string) (a *App, err error) {
 		return
 	}
 	// This is done again, to ensure the effect of CLI args take precedence
-	if a.launch, err = a.Command.ParseCLIArgs(args); log.E.Chk(err) {
+	if a.launch, _, err = a.Command.ParseCLIArgs(args); log.E.Chk(err) {
 		return
 	}
 	return
 }
 
 func (a *App) Launch(state interface{}) (err error) {
-	err = a.launch.Entrypoint(state)
+	err = a.launch.Entrypoint(a.Command, state)
 	log.E.Chk(err)
 	return
 }

@@ -13,7 +13,9 @@ import (
 	"github.com/cybriq/proc/pkg/path"
 )
 
-var NoOp = func(c interface{}) error { return nil }
+type Op func(c *Command, args []string) error
+
+var NoOp = func(c *Command, args []string) error { return nil }
 var Tags = func(s ...string) []string {
 	return s
 }
@@ -25,7 +27,7 @@ type Command struct {
 	Name          string
 	Description   string
 	Documentation string
-	Entrypoint    path.Op
+	Entrypoint    Op
 	Parent        *Command
 	Commands      Commands
 	Configs       config.Opts
@@ -35,6 +37,10 @@ type Command struct {
 
 // Commands are a slice of Command entries
 type Commands []*Command
+
+func (c *Command) AddCommand(cm *Command) {
+	c.Commands = append(c.Commands, cm)
+}
 
 const configFilename = "config.toml"
 
@@ -150,7 +156,7 @@ func (c *Command) GetOpt(path path.Path) (o config.Option) {
 
 // Cmd is a convenience function but probably unnecessary when named field
 // sparse struct literals are just as convenient.
-func Cmd(name, desc, doc string, op path.Op, cfg map[string]config.Option,
+func Cmd(name, desc, doc string, op Op, cfg map[string]config.Option,
 	cmds ...*Command) (c *Command) {
 
 	c = &Command{

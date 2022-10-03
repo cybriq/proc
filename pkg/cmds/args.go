@@ -31,7 +31,7 @@ import (
 //   can optionally be used for subcommands as well, though it is unlikely
 //   needed, if found, the Default of the tip of the Command branch
 //   selected by the CLI if there is one, otherwise the Command itself.
-func (c *Command) ParseCLIArgs(a []string) (run *Command, err error) {
+func (c *Command) ParseCLIArgs(a []string) (run *Command, runArgs []string, err error) {
 	args := make([]string, len(a))
 	var cursor int
 	for i := range a {
@@ -83,6 +83,12 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, err error) {
 			iArgs := segments[i][1:]
 			cmd := commands[i]
 			log.D.Ln(commands[i].Name, "args", iArgs)
+			// the final command can accept arbitrary arguments, that are passed
+			// into the endrypoint
+			runArgs = iArgs
+			if normalise(commands[i].Name) == "help" {
+				break
+			}
 			var cursor int
 			for cursor < len(iArgs) {
 				inc := 1
@@ -204,7 +210,7 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, err error) {
 				def)
 		}
 	}
-	log.D.F("will be executing command '%s'", run.Name)
+	log.D.F("will be executing command '%s' %s", run.Name, runArgs)
 
 	return
 }

@@ -307,9 +307,10 @@ func GetExampleCommands() (c *Command) {
 				Description: "command line wallet and chain RPC client",
 			},
 			{
-				Name:        "node",
-				Description: "ParallelCoin blockchain node",
-				Entrypoint: func(c interface{}) error {
+				Name:          "node",
+				Description:   "ParallelCoin blockchain node",
+				Documentation: "<placeholder for detailed documentation>",
+				Entrypoint: func(c *Command, args []string) error {
 					log.I.Ln("running node")
 					return nil
 				},
@@ -638,10 +639,11 @@ func GetExampleCommands() (c *Command) {
 						Default:       "false",
 					}),
 					"RPCConnect": text.New(meta.Data{
-						Aliases:       Tags("RA"),
-						Tags:          Tags("node"),
-						Label:         "RPC Connect",
-						Description:   "full node RPC for wallet",
+						Aliases: Tags("RA"),
+						Tags:    Tags("node"),
+						Label:   "RPC Connect",
+						Description: "address of full node RPC for wallet" +
+							" to connect to",
 						Documentation: "<placeholder for detailed documentation>",
 						Default:       "127.0.0.1:11048",
 					}),
