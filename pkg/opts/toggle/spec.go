@@ -32,6 +32,7 @@ var _ config.Option = &Opt{}
 type Hook func(*Opt) error
 
 func New(m meta.Data, h ...Hook) (o *Opt) {
+	m.Default = "false"
 	o = &Opt{m: meta.New(m, meta.Bool), h: h}
 	_ = o.FromString(m.Default)
 	return

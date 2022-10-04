@@ -40,8 +40,8 @@ func Help() (h *Command) {
 			c.ForEach(func(cm *Command, depth int) bool {
 				for i := range args {
 					// check for match of current command name
-					if strings.Contains(normalise(cm.Name), normalise(args[i])) {
-						if normalise(cm.Name) == normalise(args[i]) {
+					if strings.Contains(NormalizeString(cm.Name), NormalizeString(args[i])) {
+						if NormalizeString(cm.Name) == NormalizeString(args[i]) {
 							if len(args) == 1 {
 								foundCommandWhole = true
 								*foundCommands = append(*foundCommands, cm)
@@ -52,8 +52,8 @@ func Help() (h *Command) {
 					}
 					// check for matches on configs
 					for ops := range cm.Configs {
-						// log.I.Ln(ops, cm.Name, normalise(ops), normalise(args[i]))
-						if strings.Contains(normalise(ops), normalise(args[i])) {
+						// log.I.Ln(ops, cm.Name, NormalizeString(ops), NormalizeString(args[i]))
+						if strings.Contains(NormalizeString(ops), NormalizeString(args[i])) {
 							// in the case of specifying a command and an option
 							// and the option is from the command, and there is
 							// only two args, and the option is fully named, not
@@ -61,7 +61,7 @@ func Help() (h *Command) {
 							// break to return one command one option,
 							// which later is recognised to indicate show detail
 							if len(args) == 2 && len(*foundCommands) == 1 &&
-								normalise(ops) == normalise(args[i]) {
+								NormalizeString(ops) == NormalizeString(args[i]) {
 								if cm.Configs[ops].Path().Equal(cm.Path) {
 									*foundOptions = make(map[string]config.Option)
 									(*foundOptions)[ops] = cm.Configs[ops]

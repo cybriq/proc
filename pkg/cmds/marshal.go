@@ -201,22 +201,7 @@ func (c *Command) LoadConfig() (err error) {
 	if file, err = os.Open(cfgFile.Expanded()); log.E.Chk(err) {
 		log.T.F("creating config file at path: '%s'", cfgFile.Expanded())
 		// If no config found, create data dir and drop the default in place
-		if err = os.MkdirAll(filepath.Base(cfgFile.Expanded()), 0600); log.E.Chk(err) {
-			return err
-		}
-		var f *os.File
-		f, err = os.OpenFile(cfgFile.Expanded(), os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666)
-		if log.E.Chk(err) {
-			return
-		}
-		var cf []byte
-		if cf, err = c.MarshalText(); log.E.Chk(err) {
-			return
-		}
-		var n int
-		if n, err = f.Write(cf); log.E.Chk(err) || n < 1 {
-			return
-		}
+		return c.SaveConfig()
 	} else {
 		var all []byte
 		all, err = io.ReadAll(file)
@@ -225,5 +210,24 @@ func (c *Command) LoadConfig() (err error) {
 			return
 		}
 	}
+	return
+}
+
+func (c *Command) SaveConfig() (err error) {
+	cfgFile := c.GetOpt(path2.Path{c.Name, "ConfigFile"})
+	if err = os.MkdirAll(filepath.Base(cfgFile.Expanded()), 0600); log.E.Chk(err) {
+		return err
+	}
+	var f *os.File
+	f, err = os.OpenFile(cfgFile.Expanded(), os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666)
+	if log.E.Chk(err) {
+		return
+	}
+	var cf []byte
+	if cf, err = c.MarshalText(); log.E.Chk(err) {
+		return
+	}
+	_, err = f.Write(cf)
+	log.E.Chk(err)
 	return
 }

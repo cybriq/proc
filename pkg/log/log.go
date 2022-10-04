@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cybriq/proc"
@@ -47,6 +48,10 @@ var LvlStr = map[LogLevel]string{
 	Check: "check",
 	Debug: "debug",
 	Trace: "trace",
+}
+
+func GetLevelName(ll LogLevel) string {
+	return strings.TrimSpace(LvlStr[ll])
 }
 
 type (
@@ -117,9 +122,12 @@ var LevelSpecs = map[LogLevel]LevelSpec{
 }
 
 var (
-	tty, file io.Writer = os.Stderr, nil
-	writer              = tty
-	logLevel            = Trace
+	tty      io.Writer = os.Stderr
+	file     *os.File
+	path     string
+	writer   = tty
+	writerMx sync.Mutex
+	logLevel = Info
 	// App is the name of the application. Change this at the beginning of
 	// an application main.
 	App = "  main"
@@ -127,6 +135,34 @@ var (
 	// application.
 	AllSubsystems []string
 )
+
+func SetLogFilePath(p string) (err error) {
+	writerMx.Lock()
+	defer writerMx.Unlock()
+	if file != nil {
+		StopLogToFile()
+		path = p
+		err = StartLogToFile()
+	}
+	return
+}
+
+func StartLogToFile() (err error) {
+	writerMx.Lock()
+	defer writerMx.Unlock()
+	file, err = os.OpenFile(path, os.O_RDWR|os.O_APPEND, 0600)
+	writer = io.MultiWriter(tty, file)
+	return
+}
+
+func StopLogToFile() (err error) {
+	writerMx.Lock()
+	defer writerMx.Unlock()
+	writer = tty
+	err = file.Close()
+	file = nil
+	return
+}
 
 func SetLogLevel(l LogLevel) {
 	logLevel = l
@@ -212,6 +248,8 @@ func logPrint(
 ) func() {
 	return func() {
 		if level > Off && level <= logLevel {
+			writerMx.Lock()
+			defer writerMx.Unlock()
 			fmt.Fprintf(
 				writer,
 				fmt.Sprintf(

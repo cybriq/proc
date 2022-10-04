@@ -225,3 +225,7 @@ func TestCommand_Help(t *testing.T) {
 	}
 
 }
+func TestCommand_LogToFile(t *testing.T) {
+	// todo: make sure logging is working correctly, simple enable logtofile,
+	//  make a log, stop logger, read file, ensure match.
+}

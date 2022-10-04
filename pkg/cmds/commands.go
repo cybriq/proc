@@ -7,9 +7,11 @@ import (
 	"strings"
 	"sync"
 
+	log2 "github.com/cybriq/proc/pkg/log"
 	"github.com/cybriq/proc/pkg/opts/config"
 	"github.com/cybriq/proc/pkg/opts/meta"
 	"github.com/cybriq/proc/pkg/opts/text"
+	"github.com/cybriq/proc/pkg/opts/toggle"
 	"github.com/cybriq/proc/pkg/path"
 )
 
@@ -71,19 +73,96 @@ func GetConfigBase(in config.Opts, appName string, abs bool) {
 	}
 	options := config.Opts{
 		"ConfigFile": text.New(meta.Data{
-			Aliases:       []string{"CF"},
-			Label:         "Configuration File",
-			Description:   "location of configuration file",
-			Documentation: "<placeholder for detailed documentation>",
-			Default:       defaultConfigFile,
+			Aliases:     []string{"CF"},
+			Label:       "Configuration File",
+			Description: "location of configuration file",
+			Documentation: strings.TrimSpace(`
+The configuration file path defines the place where the configuration will be
+loaded from at application startup, and where it will be written if changed.
+`),
+			Default: defaultConfigFile,
 		}, text.NormalizeFilesystemPath(abs, appName)),
+
 		"DataDir": text.New(meta.Data{
-			Aliases:       []string{"DD"},
-			Label:         "Data Directory",
-			Description:   "root folder where application data is stored",
-			Documentation: "<placeholder for detailed documentation>",
-			Default:       defaultDataDir,
+			Aliases:     []string{"DD"},
+			Label:       "Data Directory",
+			Description: "root folder where application data is stored",
+			Documentation: strings.TrimSpace(`
+
+`),
+			Default: defaultDataDir,
 		}, text.NormalizeFilesystemPath(abs, appName)),
+
+		"LogLevel": text.New(meta.Data{
+			Aliases:     []string{"LL"},
+			Label:       "Log Level",
+			Description: "Level of logging to print " + fmt.Sprint(log2.LvlStr),
+			Documentation: strings.TrimSpace(`
+Log levels are values in ascending order with the following names:	
+
+	Off 
+	Fatal
+	Error
+	Check
+	Warn
+	Info
+	Debug
+	Trace
+
+The level set in this configuration item defines the limit in ascending order
+of what log level printers will output. Default is 'Info' which means Debug and 
+Trace log statements will not print. 
+`),
+			Default: log2.GetLevelName(log2.Info),
+		}, func(o *text.Opt) (err error) {
+			v := strings.TrimSpace(o.Value().Text())
+			found := false
+			lvl := log2.Info
+			for i := range log2.LvlStr {
+				ll := log2.GetLevelName(i)
+				if NormalizeString(v) == strings.TrimSpace(ll) {
+					lvl = i
+					found = true
+				}
+			}
+			if !found {
+				err = fmt.Errorf("log level value %s not valid from %v",
+					v, log2.LvlStr)
+				_ = o.FromString(log2.GetLevelName(lvl))
+			}
+			log2.SetLogLevel(lvl)
+			return
+		}),
+
+		"LogFilePath": text.New(meta.Data{
+			Aliases:     Tags("LFP"),
+			Label:       "Log To File",
+			Description: "Write logs to the specified file",
+			Documentation: strings.TrimSpace(`
+Sets the path of the file to write logs to.
+`),
+			Default: filepath.Join(defaultDataDir, "log.txt"),
+		}, func(o *text.Opt) (err error) {
+			err = log2.SetLogFilePath(o.Expanded())
+			return
+		}, text.NormalizeFilesystemPath(abs, appName)),
+
+		"LogToFile": toggle.New(meta.Data{
+			Aliases:     Tags("LTF"),
+			Label:       "Log To File",
+			Description: "Enable writing of logs",
+			Documentation: strings.TrimSpace(`
+Enables the writing of logs to the file path defined in LogFilePath.
+`),
+			Default: "false",
+		}, func(o *toggle.Opt) (err error) {
+			if o.Value().Bool() {
+				err = log2.StartLogToFile()
+			} else {
+				err = log2.StopLogToFile()
+			}
+			return
+		}),
 	}
 	for i := range options {
 		in[i] = options[i]
@@ -152,22 +231,6 @@ func (c *Command) GetOpt(path path.Path) (o config.Option) {
 		}
 	}
 	return nil
-}
-
-// Cmd is a convenience function but probably unnecessary when named field
-// sparse struct literals are just as convenient.
-func Cmd(name, desc, doc string, op Op, cfg map[string]config.Option,
-	cmds ...*Command) (c *Command) {
-
-	c = &Command{
-		Name:          name,
-		Description:   desc,
-		Documentation: doc,
-		Entrypoint:    op,
-		Commands:      cmds,
-		Configs:       cfg,
-	}
-	return
 }
 
 // ForEach runs a closure on every node in the Commands tree, stopping if the

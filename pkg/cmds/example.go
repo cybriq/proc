@@ -123,20 +123,6 @@ func GetExampleCommands() (c *Command) {
 				Documentation: lorem,
 				Default:       "limituser",
 			}),
-			"LogDir": text.New(meta.Data{
-				Aliases: Tags("LD"),
-				Tags: Tags(
-					"node",
-					"wallet",
-					"ctl",
-					"kopach",
-					"worker",
-				),
-				Label:         "Log Directory",
-				Description:   "folder where log files are written",
-				Documentation: lorem,
-				Default:       "~/.pod",
-			}),
 			"LogFilter": list.New(meta.Data{
 				Aliases: Tags("LF"),
 				Tags: Tags(
@@ -149,29 +135,6 @@ func GetExampleCommands() (c *Command) {
 				Label:         "Log Filter",
 				Description:   "list of packages that will not print logs",
 				Documentation: lorem,
-			}),
-			"LogLevel": text.New(meta.Data{
-				Aliases: Tags("LL"),
-				Tags: Tags(
-					"node",
-					"wallet",
-					"ctl",
-					"kopach",
-					"worker",
-				),
-				Label:       "Log Level",
-				Description: "maximum log level to output",
-				Options: []string{
-					"off",
-					"fatal",
-					"error",
-					"info",
-					"check",
-					"debug",
-					"trace",
-				},
-				Documentation: lorem,
-				Default:       "info",
 			}),
 			"OneTimeTLSKey": toggle.New(meta.Data{
 				Aliases:       Tags("OTK"),
