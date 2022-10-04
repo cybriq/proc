@@ -13,6 +13,7 @@ import (
 	"github.com/cybriq/proc/pkg/opts/text"
 	"github.com/cybriq/proc/pkg/opts/toggle"
 	"github.com/cybriq/proc/pkg/path"
+	"github.com/cybriq/proc/pkg/util"
 )
 
 type Op func(c *Command, args []string) error
@@ -94,24 +95,18 @@ loaded from at application startup, and where it will be written if changed.
 		}, text.NormalizeFilesystemPath(abs, appName)),
 
 		"LogLevel": text.New(meta.Data{
-			Aliases:     []string{"LL"},
-			Label:       "Log Level",
-			Description: "Level of logging to print " + fmt.Sprint(log2.LvlStr),
+			Aliases: []string{"LL"},
+			Label:   "Log Level",
+			Description: "Level of logging to print: [ " + log2.LvlStr.String() +
+				" ]",
 			Documentation: strings.TrimSpace(`
 Log levels are values in ascending order with the following names:	
 
-	Off 
-	Fatal
-	Error
-	Check
-	Warn
-	Info
-	Debug
-	Trace
+	` + log2.LvlStr.String() + `
 
 The level set in this configuration item defines the limit in ascending order
-of what log level printers will output. Default is 'Info' which means Debug and 
-Trace log statements will not print. 
+of what log level printers will output. Default is 'info' which means debug and 
+trace log statements will not print. 
 `),
 			Default: log2.GetLevelName(log2.Info),
 		}, func(o *text.Opt) (err error) {
@@ -120,7 +115,7 @@ Trace log statements will not print.
 			lvl := log2.Info
 			for i := range log2.LvlStr {
 				ll := log2.GetLevelName(i)
-				if NormalizeString(v) == strings.TrimSpace(ll) {
+				if util.Norm(v) == strings.TrimSpace(ll) {
 					lvl = i
 					found = true
 				}
@@ -157,10 +152,13 @@ Enables the writing of logs to the file path defined in LogFilePath.
 			Default: "false",
 		}, func(o *toggle.Opt) (err error) {
 			if o.Value().Bool() {
+				log.D.Ln("starting log file writing")
 				err = log2.StartLogToFile()
 			} else {
 				err = log2.StopLogToFile()
+				log.D.Ln("stopped log file writing")
 			}
+			log.E.Chk(err)
 			return
 		}),
 	}
@@ -194,7 +192,7 @@ func Init(c *Command, p path.Path) (cmd *Command, err error) {
 	}
 	c.ForEach(func(cmd *Command, _ int) bool {
 		for i := range cmd.Configs {
-			err := cmd.Configs[i].RunHooks()
+			err = cmd.Configs[i].RunHooks()
 			if log.E.Chk(err) {
 				return false
 			}
@@ -204,6 +202,7 @@ func Init(c *Command, p path.Path) (cmd *Command, err error) {
 	return c, err
 }
 
+// GetOpt returns the option at a requested path
 func (c *Command) GetOpt(path path.Path) (o config.Option) {
 	p := make([]string, len(path))
 	for i := range path {
@@ -216,21 +215,39 @@ func (c *Command) GetOpt(path path.Path) (o config.Option) {
 	case len(p) > 2:
 		// search subcommands
 		for i := range c.Commands {
-			if c.Commands[i].Name == p[1] {
+			if util.Norm(c.Commands[i].Name) == util.Norm(p[1]) {
 				return c.Commands[i].GetOpt(p[1:])
 			}
 		}
 	case len(p) == 2:
 		// check name matches path, search for config item
-		if c.Name == p[0] {
+		if util.Norm(c.Name) == util.Norm(p[0]) {
 			for i := range c.Configs {
-				if i == p[1] {
+				if util.Norm(i) == util.Norm(p[1]) {
 					return c.Configs[i]
 				}
 			}
 		}
 	}
 	return nil
+}
+
+func (c *Command) GetCommand(p string) (o *Command) {
+	pp := strings.Split(p, " ")
+	path := path.Path(pp)
+	// log.I.F("%v == %v", path, c.Path)
+	if path.Equal(c.Path) {
+		// log.I.Ln("found", c.Path)
+		return c
+	}
+	for i := range c.Commands {
+		// log.I.Ln(c.Commands[i].Path)
+		o = c.Commands[i].GetCommand(p)
+		if o != nil {
+			return
+		}
+	}
+	return
 }
 
 // ForEach runs a closure on every node in the Commands tree, stopping if the

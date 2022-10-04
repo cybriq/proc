@@ -19,7 +19,7 @@ func main() {
 	log.W.Ln("testing")
 	log.E.Chk(errors.New("testing"))
 	log.F.Ln("testing")
-	log.I.S(log2.AllSubsystems)
+	log.I.S(log2.GetAllSubsystems())
 	log.I.Ln("setting timestamp format to RFC822Z")
 	log2.SetTimeStampFormat(time.RFC822Z)
 	log.I.Ln("setting log level to info and printing from all levels")

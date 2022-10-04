@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/cybriq/proc/pkg/opts/config"
+	"github.com/cybriq/proc/pkg/util"
 )
 
 // Help is a default top level command that subsequent
@@ -40,8 +41,8 @@ func Help() (h *Command) {
 			c.ForEach(func(cm *Command, depth int) bool {
 				for i := range args {
 					// check for match of current command name
-					if strings.Contains(NormalizeString(cm.Name), NormalizeString(args[i])) {
-						if NormalizeString(cm.Name) == NormalizeString(args[i]) {
+					if strings.Contains(util.Norm(cm.Name), util.Norm(args[i])) {
+						if util.Norm(cm.Name) == util.Norm(args[i]) {
 							if len(args) == 1 {
 								foundCommandWhole = true
 								*foundCommands = append(*foundCommands, cm)
@@ -52,8 +53,8 @@ func Help() (h *Command) {
 					}
 					// check for matches on configs
 					for ops := range cm.Configs {
-						// log.I.Ln(ops, cm.Name, NormalizeString(ops), NormalizeString(args[i]))
-						if strings.Contains(NormalizeString(ops), NormalizeString(args[i])) {
+						// log.I.Ln(ops, cm.Name, Norm(ops), Norm(args[i]))
+						if strings.Contains(util.Norm(ops), util.Norm(args[i])) {
 							// in the case of specifying a command and an option
 							// and the option is from the command, and there is
 							// only two args, and the option is fully named, not
@@ -61,7 +62,7 @@ func Help() (h *Command) {
 							// break to return one command one option,
 							// which later is recognised to indicate show detail
 							if len(args) == 2 && len(*foundCommands) == 1 &&
-								NormalizeString(ops) == NormalizeString(args[i]) {
+								util.Norm(ops) == util.Norm(args[i]) {
 								if cm.Configs[ops].Path().Equal(cm.Path) {
 									*foundOptions = make(map[string]config.Option)
 									(*foundOptions)[ops] = cm.Configs[ops]
@@ -164,7 +165,9 @@ func Help() (h *Command) {
 						out += fmt.Sprintf("Help information for option '%s'\n\n",
 							i)
 					}
-					out += fmt.Sprintf("Command Path:\n\n\t%s\n\n", path)
+					if len(path) > 1 {
+						out += fmt.Sprintf("Command Path:\n\n\t%s\n\n", path)
+					}
 					out += fmt.Sprintf("%s [-%s]\n\n", i, strings.ToLower(i))
 					out += fmt.Sprintf("\t%s\n\n", om.Description())
 					out += fmt.Sprintf("Default:\n\n\t%s %s--%s=%s\n\n",

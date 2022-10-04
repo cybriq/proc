@@ -2,6 +2,7 @@ package cmds
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -128,6 +129,18 @@ func TestCommand_Help(t *testing.T) {
 		t.FailNow()
 	}
 	fmt.Print(testSeparator)
+	args1 = "/random/path/to/server_binary help loglevel"
+	fmt.Println(args1)
+	args1s = strings.Split(args1, " ")
+	run, args, err = o.ParseCLIArgs(args1s)
+	if log.E.Chk(err) {
+		t.FailNow()
+	}
+	err = run.Entrypoint(o, args)
+	if log.E.Chk(err) {
+		t.FailNow()
+	}
+	fmt.Print(testSeparator)
 	args1 = "/random/path/to/server_binary help help"
 	fmt.Println(args1)
 	args1s = strings.Split(args1, " ")
@@ -226,6 +239,33 @@ func TestCommand_Help(t *testing.T) {
 
 }
 func TestCommand_LogToFile(t *testing.T) {
-	// todo: make sure logging is working correctly, simple enable logtofile,
-	//  make a log, stop logger, read file, ensure match.
+	log2.SetLogLevel(log2.Trace)
+	ex := GetExampleCommands()
+	ex.AddCommand(Help())
+	ex, _ = Init(ex, nil)
+	ex.GetOpt(path.From("pod123 loglevel")).FromString("debug")
+	var err error
+	// this will create a place we can write the logs
+	if err = ex.SaveConfig(); log.E.Chk(err) {
+		err = os.RemoveAll(ex.Configs["ConfigFile"].Expanded())
+		if log.E.Chk(err) {
+		}
+		t.FailNow()
+	}
+	lfp := ex.GetOpt(path.From("pod123 logfilepath"))
+	o := ex.GetOpt(path.From("pod123 logtofile"))
+	o.FromString("true")
+	log.I.F("%s", lfp)
+	o.FromString("false")
+	var b []byte
+	if b, err = os.ReadFile(lfp.Expanded()); log.E.Chk(err) {
+		t.FailNow()
+	}
+	str := string(b)
+	log.I.F("'%s'", str)
+	if !strings.Contains(str, lfp.String()) {
+		t.FailNow()
+	}
+	if err := os.RemoveAll(ex.Configs["DataDir"].Expanded()); log.E.Chk(err) {
+	}
 }

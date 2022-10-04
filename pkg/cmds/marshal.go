@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -198,7 +197,7 @@ func (c *Command) UnmarshalText(t []byte) (err error) {
 func (c *Command) LoadConfig() (err error) {
 	cfgFile := c.GetOpt(path2.Path{c.Name, "ConfigFile"})
 	var file io.Reader
-	if file, err = os.Open(cfgFile.Expanded()); log.E.Chk(err) {
+	if file, err = os.Open(cfgFile.Expanded()); err != nil {
 		log.T.F("creating config file at path: '%s'", cfgFile.Expanded())
 		// If no config found, create data dir and drop the default in place
 		return c.SaveConfig()
@@ -214,12 +213,13 @@ func (c *Command) LoadConfig() (err error) {
 }
 
 func (c *Command) SaveConfig() (err error) {
-	cfgFile := c.GetOpt(path2.Path{c.Name, "ConfigFile"})
-	if err = os.MkdirAll(filepath.Base(cfgFile.Expanded()), 0600); log.E.Chk(err) {
+	datadir := c.GetOpt(path2.Path{c.Name, "DataDir"})
+	if err = os.MkdirAll(datadir.Expanded(), 0700); log.E.Chk(err) {
 		return err
 	}
 	var f *os.File
-	f, err = os.OpenFile(cfgFile.Expanded(), os.O_RDWR|os.O_CREATE|os.O_EXCL, 0666)
+	cfgFile := c.GetOpt(path2.From("pod123 configfile"))
+	f, err = os.OpenFile(cfgFile.Expanded(), os.O_RDWR|os.O_CREATE, 0666)
 	if log.E.Chk(err) {
 		return
 	}

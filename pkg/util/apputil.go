@@ -1,9 +1,10 @@
-package apputil
+package util
 
 import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 // EnsureDir checks a file could be written to a path, creates the directories as needed
@@ -59,4 +60,8 @@ func PrependForWindowsWithStart(args []string) []string {
 		)
 	}
 	return args
+}
+
+func Norm(s string) string {
+	return strings.ToLower(s)
 }

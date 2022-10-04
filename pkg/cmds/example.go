@@ -29,7 +29,7 @@ culpa qui officia deserunt mollit anim id est laborum.`
 // parallelcoin kopach miner)
 func GetExampleCommands() (c *Command) {
 	c = &Command{
-		Name:          "pod",
+		Name:          "pod123",
 		Description:   "All in one everything for parallelcoin",
 		Documentation: lorem,
 		Default:       Tags("gui"),
@@ -288,6 +288,33 @@ func GetExampleCommands() (c *Command) {
 				Entrypoint: func(c *Command, args []string) error {
 					log.I.Ln("running node")
 					return nil
+				},
+				Commands: []*Command{
+					{
+						Name:          "dropaddrindex",
+						Description:   "drop the address database index",
+						Documentation: lorem,
+					},
+					{
+						Name:          "droptxindex",
+						Description:   "drop the transaction database index",
+						Documentation: lorem,
+					},
+					{
+						Name:          "dropcfindex",
+						Description:   "drop the cfilter database index",
+						Documentation: lorem,
+					},
+					{
+						Name:          "dropindexes",
+						Description:   "drop all of the indexes",
+						Documentation: lorem,
+					},
+					{
+						Name:          "resetchain",
+						Description:   "deletes the current blockchain cache to force redownload",
+						Documentation: lorem,
+					},
 				},
 				Configs: config.Opts{
 					"AddCheckpoints": list.New(meta.Data{
@@ -728,33 +755,6 @@ func GetExampleCommands() (c *Command) {
 						Description:   "peers that you don't want to ever ban",
 						Documentation: lorem,
 					}),
-				},
-				Commands: []*Command{
-					{
-						Name:          "dropaddrindex",
-						Description:   "drop the address database index",
-						Documentation: lorem,
-					},
-					{
-						Name:          "droptxindex",
-						Description:   "drop the transaction database index",
-						Documentation: lorem,
-					},
-					{
-						Name:          "dropcfindex",
-						Description:   "drop the cfilter database index",
-						Documentation: lorem,
-					},
-					{
-						Name:          "dropindexes",
-						Description:   "drop all of the indexes",
-						Documentation: lorem,
-					},
-					{
-						Name:          "resetchain",
-						Description:   "deletes the current blockchain cache to force redownload",
-						Documentation: lorem,
-					},
 				},
 			},
 			{

@@ -37,9 +37,19 @@ const (
 	Trace
 )
 
+type LevelMap map[LogLevel]string
+
+func (l LevelMap) String() (s string) {
+	ss := make([]string, len(l))
+	for i := range l {
+		ss[i] = strings.TrimSpace(l[i])
+	}
+	return strings.Join(ss, " ")
+}
+
 // LvlStr is a map that provides the uniform width strings that are printed
 // to identify the LogLevel of a log entry.
-var LvlStr = map[LogLevel]string{
+var LvlStr = LevelMap{
 	Off:   "off  ",
 	Fatal: "fatal",
 	Error: "error",
@@ -131,18 +141,33 @@ var (
 	// App is the name of the application. Change this at the beginning of
 	// an application main.
 	App = "  main"
-	// AllSubsystems stores all of the package subsystem names found in the current
+	// allSubsystems stores all package subsystem names found in the current
 	// application.
-	AllSubsystems []string
+	allSubsystems []string
 )
+
+func GetAllSubsystems() (o []string) {
+	writerMx.Lock()
+	defer writerMx.Unlock()
+	o = make([]string, len(allSubsystems))
+	for i := range allSubsystems {
+		o[i] = allSubsystems[i]
+	}
+	return
+}
 
 func SetLogFilePath(p string) (err error) {
 	writerMx.Lock()
 	defer writerMx.Unlock()
 	if file != nil {
-		StopLogToFile()
+		err = StopLogToFile()
+		if err != nil {
+			return err
+		}
 		path = p
 		err = StartLogToFile()
+	} else {
+		path = p
 	}
 	return
 }
@@ -150,7 +175,11 @@ func SetLogFilePath(p string) (err error) {
 func StartLogToFile() (err error) {
 	writerMx.Lock()
 	defer writerMx.Unlock()
-	file, err = os.OpenFile(path, os.O_RDWR|os.O_APPEND, 0600)
+	file, err = os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", path)
+		return err
+	}
 	writer = io.MultiWriter(tty, file)
 	return
 }
@@ -159,12 +188,16 @@ func StopLogToFile() (err error) {
 	writerMx.Lock()
 	defer writerMx.Unlock()
 	writer = tty
-	err = file.Close()
-	file = nil
+	if file != nil {
+		err = file.Close()
+		file = nil
+	}
 	return
 }
 
 func SetLogLevel(l LogLevel) {
+	writerMx.Lock()
+	defer writerMx.Unlock()
 	logLevel = l
 }
 
@@ -248,21 +281,19 @@ func logPrint(
 ) func() {
 	return func() {
 		if level > Off && level <= logLevel {
+			s := fmt.Sprintf(
+				"%-58v%s%s%-6v %s\n",
+				GetLoc(3, subsystem),
+				color.Gray.Sprint(getTimeText()),
+				fmt.Sprint(" ["+App+"]"),
+				LevelSpecs[level].Colorizer(
+					" "+LevelSpecs[level].Name+" ",
+				),
+				printFunc(),
+			)
 			writerMx.Lock()
 			defer writerMx.Unlock()
-			fmt.Fprintf(
-				writer,
-				fmt.Sprintf(
-					"%-58v%s%s%-6v %s\n",
-					GetLoc(3, subsystem),
-					color.Gray.Sprint(getTimeText()),
-					fmt.Sprint(" ["+App+"]"),
-					LevelSpecs[level].Colorizer(
-						" "+LevelSpecs[level].Name+" ",
-					),
-					printFunc(),
-				),
-			)
+			fmt.Fprintf(writer, s)
 		}
 	}
 }
@@ -271,7 +302,7 @@ func logPrint(
 // call this function right at the top of the main, which runs after
 // declarations and main/init. Really this is just here to alert the reader.
 func sortSubsystemsList() {
-	sort.Strings(AllSubsystems)
+	sort.Strings(allSubsystems)
 }
 
 // Add adds a subsystem to the list of known subsystems and returns the
@@ -288,7 +319,9 @@ func Add(pathBase string) (subsystem string) {
 		}
 		split := strings.Split(fromRoot, "/")
 		subsystem = strings.Join(split[:len(split)-1], "/")
-		AllSubsystems = append(AllSubsystems, subsystem)
+		writerMx.Lock()
+		defer writerMx.Unlock()
+		allSubsystems = append(allSubsystems, subsystem)
 		sortSubsystemsList()
 	}
 	return
@@ -297,7 +330,7 @@ func Add(pathBase string) (subsystem string) {
 // GetLogger returns a set of LevelPrinter with their subsystem preloaded
 func GetLogger(pathBase string) (l *Logger) {
 	ss := Add(pathBase)
-	// fmt.Println("subsystems:", AllSubsystems)
+	// fmt.Println("subsystems:", allSubsystems)
 	return &Logger{
 		getOnePrinter(Fatal, ss),
 		getOnePrinter(Error, ss),

@@ -16,12 +16,15 @@ func TestNew(t *testing.T) {
 	if a, err = New(cmds.GetExampleCommands(), args1s); log.E.Chk(err) {
 		t.FailNow()
 	}
-	if err = a.Launch(nil); log.E.Chk(err) {
+	if err = a.Launch(); log.E.Chk(err) {
 		t.FailNow()
 	}
-	if err = os.Remove(a.Command.GetOpt(cmds.Tags("pod",
+	if err = os.Remove(a.Command.GetOpt(cmds.Tags("pod123",
 		"ConfigFile")).Expanded()); log.E.Chk(err) {
 
 		t.FailNow()
 	}
+	if err := os.RemoveAll(a.Command.Configs["DataDir"].Expanded()); log.E.Chk(err) {
+	}
+
 }

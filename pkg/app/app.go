@@ -15,7 +15,7 @@ func New(cmd *cmds.Command, args []string) (a *App, err error) {
 	// Add the default configuration items for datadir/configfile
 	cmds.GetConfigBase(cmd.Configs, cmd.Name, false)
 	// Add the help function
-	cmd.Commands = append(cmd.Commands, cmds.Help())
+	cmd.AddCommand(cmds.Help())
 	a = &App{Command: cmd}
 	// We first parse the CLI args, in case config file location has been
 	// specified

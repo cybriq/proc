@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/cybriq/proc/pkg/opts/meta"
+	"github.com/cybriq/proc/pkg/util"
 )
 
 // ParseCLIArgs reads a command line argument slice (presumably from
@@ -50,7 +51,7 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, runArgs []string, err 
 	// where relevant config items will be found.
 	for !done {
 		for i := range current.Commands {
-			if NormalizeString(args[cursor]) == NormalizeString(current.Commands[i].Name) {
+			if util.Norm(args[cursor]) == util.Norm(current.Commands[i].Name) {
 				// the command to run is the last, so update each new command
 				// found
 				run = current.Commands[i]
@@ -86,7 +87,7 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, runArgs []string, err 
 			// the final command can accept arbitrary arguments, that are passed
 			// into the endrypoint
 			runArgs = iArgs
-			if NormalizeString(commands[i].Name) == "help" {
+			if util.Norm(commands[i].Name) == "help" {
 				break
 			}
 			var cursor int
@@ -114,7 +115,7 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, runArgs []string, err 
 							names := append(
 								[]string{cfgName}, aliases...)
 							for _, name := range names {
-								if NormalizeString(name) == NormalizeString(split[0]) {
+								if util.Norm(name) == util.Norm(split[0]) {
 									log.D.F("assigning value '%s' to %s",
 										split[1], split[0])
 									err = cmd.Configs[cfgName].FromString(split[1])
@@ -132,7 +133,7 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, runArgs []string, err 
 								names := append(
 									[]string{cfgName}, aliases...)
 								for _, name := range names {
-									if NormalizeString(name) == NormalizeString(arg) {
+									if util.Norm(name) == util.Norm(arg) {
 										// check for booleans, which can only be
 										// followed by true or false
 										if cmd.Configs[cfgName].Type() == meta.Bool {
@@ -213,8 +214,4 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, runArgs []string, err 
 	// log.D.F("will be executing command '%s' %s", run.Name, runArgs)
 
 	return
-}
-
-func NormalizeString(s string) string {
-	return strings.ToLower(s)
 }

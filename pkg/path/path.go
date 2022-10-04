@@ -2,6 +2,8 @@ package path
 
 import (
 	"strings"
+
+	"github.com/cybriq/proc/pkg/util"
 )
 
 type Path []string
@@ -15,6 +17,11 @@ func (p Path) TrimPrefix() Path {
 
 func (p Path) String() string {
 	return strings.Join(p, " ")
+}
+
+func From(s string) (p Path) {
+	p = strings.Split(s, " ")
+	return
 }
 
 func (p Path) Parent() (p1 Path) {
@@ -44,8 +51,9 @@ func (p Path) Common(p2 Path) (o Path) {
 func (p Path) Equal(p2 Path) bool {
 	if len(p) == len(p2) {
 		for i := range p {
-			if p[i] != p2[i] {
-				break
+			if util.Norm(p[i]) !=
+				util.Norm(p2[i]) {
+				return false
 			}
 		}
 		return true
