@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -106,6 +107,9 @@ func TestCommand_GetEnvs(t *testing.T) {
 		t.FailNow()
 	}
 }
+
+var testSeparator = fmt.Sprintf("%s\n", strings.Repeat("-", 72))
+
 func TestCommand_Help(t *testing.T) {
 	log2.SetLogLevel(log2.Debug)
 	ex := GetExampleCommands()
@@ -113,6 +117,7 @@ func TestCommand_Help(t *testing.T) {
 	o, _ := Init(ex, nil)
 	o.Commands = append(o.Commands)
 	args1 := "/random/path/to/server_binary help"
+	fmt.Println(args1)
 	args1s := strings.Split(args1, " ")
 	run, args, err := o.ParseCLIArgs(args1s)
 	if log.E.Chk(err) {
@@ -122,7 +127,9 @@ func TestCommand_Help(t *testing.T) {
 	if log.E.Chk(err) {
 		t.FailNow()
 	}
-	args1 = "/random/path/to/server_binary help rpcconnect"
+	fmt.Print(testSeparator)
+	args1 = "/random/path/to/server_binary help help"
+	fmt.Println(args1)
 	args1s = strings.Split(args1, " ")
 	run, args, err = o.ParseCLIArgs(args1s)
 	if log.E.Chk(err) {
@@ -132,7 +139,9 @@ func TestCommand_Help(t *testing.T) {
 	if log.E.Chk(err) {
 		t.FailNow()
 	}
+	fmt.Print(testSeparator)
 	args1 = "/random/path/to/server_binary help node"
+	fmt.Println(args1)
 	args1s = strings.Split(args1, " ")
 	run, args, err = o.ParseCLIArgs(args1s)
 	if log.E.Chk(err) {
@@ -142,7 +151,45 @@ func TestCommand_Help(t *testing.T) {
 	if log.E.Chk(err) {
 		t.FailNow()
 	}
+	fmt.Print(testSeparator)
+	args1 = "/random/path/to/server_binary help rpcconnect"
+	fmt.Println(args1)
+	args1s = strings.Split(args1, " ")
+	run, args, err = o.ParseCLIArgs(args1s)
+	if log.E.Chk(err) {
+		t.FailNow()
+	}
+	err = run.Entrypoint(o, args)
+	if log.E.Chk(err) {
+		t.FailNow()
+	}
+	fmt.Print(testSeparator)
+	args1 = "/random/path/to/server_binary help kopach rpcconnect"
+	fmt.Println(args1)
+	args1s = strings.Split(args1, " ")
+	run, args, err = o.ParseCLIArgs(args1s)
+	if log.E.Chk(err) {
+		t.FailNow()
+	}
+	err = run.Entrypoint(o, args)
+	if log.E.Chk(err) {
+		t.FailNow()
+	}
+	fmt.Print(testSeparator)
+	args1 = "/random/path/to/server_binary help node rpcconnect"
+	fmt.Println(args1)
+	args1s = strings.Split(args1, " ")
+	run, args, err = o.ParseCLIArgs(args1s)
+	if log.E.Chk(err) {
+		t.FailNow()
+	}
+	err = run.Entrypoint(o, args)
+	if log.E.Chk(err) {
+		t.FailNow()
+	}
+	fmt.Print(testSeparator)
 	args1 = "/random/path/to/server_binary help nodeoff"
+	fmt.Println(args1)
 	args1s = strings.Split(args1, " ")
 	run, args, err = o.ParseCLIArgs(args1s)
 	if log.E.Chk(err) {
@@ -152,7 +199,9 @@ func TestCommand_Help(t *testing.T) {
 	if log.E.Chk(err) {
 		t.FailNow()
 	}
+	fmt.Print(testSeparator)
 	args1 = "/random/path/to/server_binary help user"
+	fmt.Println(args1)
 	args1s = strings.Split(args1, " ")
 	run, args, err = o.ParseCLIArgs(args1s)
 	if log.E.Chk(err) {
@@ -162,7 +211,9 @@ func TestCommand_Help(t *testing.T) {
 	if log.E.Chk(err) {
 		t.FailNow()
 	}
+	fmt.Print(testSeparator)
 	args1 = "/random/path/to/server_binary help file"
+	fmt.Println(args1)
 	args1s = strings.Split(args1, " ")
 	run, args, err = o.ParseCLIArgs(args1s)
 	if log.E.Chk(err) {

@@ -82,7 +82,7 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, runArgs []string, err 
 		if len(segments[i]) > 0 {
 			iArgs := segments[i][1:]
 			cmd := commands[i]
-			log.D.Ln(commands[i].Name, "args", iArgs)
+			// log.D.Ln(commands[i].Name, "args", iArgs)
 			// the final command can accept arbitrary arguments, that are passed
 			// into the endrypoint
 			runArgs = iArgs
@@ -210,7 +210,7 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, runArgs []string, err 
 				def)
 		}
 	}
-	log.D.F("will be executing command '%s' %s", run.Name, runArgs)
+	// log.D.F("will be executing command '%s' %s", run.Name, runArgs)
 
 	return
 }

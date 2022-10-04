@@ -6,7 +6,8 @@ import (
 
 type App struct {
 	*cmds.Command
-	launch *cmds.Command
+	launch  *cmds.Command
+	runArgs []string
 	cmds.Envs
 }
 
@@ -30,14 +31,14 @@ func New(cmd *cmds.Command, args []string) (a *App, err error) {
 		return
 	}
 	// This is done again, to ensure the effect of CLI args take precedence
-	if a.launch, _, err = a.Command.ParseCLIArgs(args); log.E.Chk(err) {
+	if a.launch, a.runArgs, err = a.Command.ParseCLIArgs(args); log.E.Chk(err) {
 		return
 	}
 	return
 }
 
-func (a *App) Launch(state interface{}) (err error) {
-	err = a.launch.Entrypoint(a.Command, state)
+func (a *App) Launch() (err error) {
+	err = a.launch.Entrypoint(a.Command, a.runArgs)
 	log.E.Chk(err)
 	return
 }

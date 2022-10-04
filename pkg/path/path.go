@@ -41,6 +41,18 @@ func (p Path) Common(p2 Path) (o Path) {
 	return
 }
 
+func (p Path) Equal(p2 Path) bool {
+	if len(p) == len(p2) {
+		for i := range p {
+			if p[i] != p2[i] {
+				break
+			}
+		}
+		return true
+	}
+	return false
+}
+
 func GetIndent(d int) string {
 	return strings.Repeat("\t", d)
 }
