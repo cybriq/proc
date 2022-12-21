@@ -1,4 +1,7 @@
-package proc
+// Package indra is the root level package for Indranet, a low latency, 
+// Lightning Network monetised distributed VPN protocol designed for providing
+// strong anonymity to valuable internet traffic.
+package indra
 
 import (
 	"fmt"
@@ -10,9 +13,9 @@ var (
 	// GitRef is the gitref, as in refs/heads/branchname.
 	GitRef = "refs/heads/master"
 	// ParentGitCommit is the commit hash of the parent HEAD.
-	ParentGitCommit = "2507cfa7986da8c9745c7a7d0bfc12ad3451278d"
+	ParentGitCommit = "0d44180a71cd218cdb9a345e0888d8bc563b5f01"
 	// BuildTime stores the time when the current binary was built.
-	BuildTime = "2022-10-04T17:04:38+02:00"
+	BuildTime = "2022-12-21T18:29:06Z"
 	// SemVer lists the (latest) git tag on the build.
 	SemVer = "v0.2.0"
 	// PathBase is the path base returned from runtime caller.
@@ -31,7 +34,7 @@ func Version() string {
 		"\nRepository Information\n",
 		"\tGit repository: "+URL+"\n",
 		"\tBranch: "+GitRef+"\n",
-		"\tPacethGitCommit: "+ParentGitCommit+"\n",
+		"\tParentGitCommit: "+ParentGitCommit+"\n",
 		"\tBuilt: "+BuildTime+"\n",
 		"\tSemVer: "+SemVer+"\n",
 	)

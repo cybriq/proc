@@ -218,7 +218,7 @@ func (c *Command) SaveConfig() (err error) {
 		return err
 	}
 	var f *os.File
-	cfgFile := c.GetOpt(path2.From("pod123 configfile"))
+	cfgFile := c.GetOpt(path2.From(c.Name + " configfile"))
 	f, err = os.OpenFile(cfgFile.Expanded(), os.O_RDWR|os.O_CREATE, 0666)
 	if log.E.Chk(err) {
 		return
