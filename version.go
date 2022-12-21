@@ -1,7 +1,4 @@
-// Package indra is the root level package for Indranet, a low latency, 
-// Lightning Network monetised distributed VPN protocol designed for providing
-// strong anonymity to valuable internet traffic.
-package indra
+package proc
 
 import (
 	"fmt"
