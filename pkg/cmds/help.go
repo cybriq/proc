@@ -132,7 +132,6 @@ func HelpEntrypoint(c *Command, args []string) (err error) {
 		}
 		sort.Sort(outs)
 		// out += fmt.Sprintf("\n%s - %s\n\n", cm.Path, cm.Description)
-		out += fmt.Sprintf("%s - %s\n\n", c.Name, c.Description)
 		out += fmt.Sprintf(
 			"Help information for command '%s':\n\n",
 			args[0])
@@ -222,7 +221,7 @@ func HelpEntrypoint(c *Command, args []string) (err error) {
 			out += fmt.Sprintf("%s [-%s]\n\n", i, strings.ToLower(i))
 			out += fmt.Sprintf("\t%s\n\n", om.Description())
 			out += fmt.Sprintf("Default:\n\n\t%s %s--%s=%s\n\n",
-				os.Args[0], path, strings.ToLower(i), om.Default())
+				c.Name, path, strings.ToLower(i), om.Default())
 			out += fmt.Sprintf("Documentation:\n\n%s\n\n",
 				IndentTextBlock(om.Documentation(), 1))
 		}
@@ -251,9 +250,6 @@ func HelpEntrypoint(c *Command, args []string) (err error) {
 				cm := (*foundCommands)[i]
 				fmt.Fprintf(w, "\t%s\t %s\n",
 					strings.ToLower(cm.Name), cm.Description)
-				w.Flush()
-				out += b.String()
-				b.Reset()
 			}
 			out += "\n"
 		}
@@ -266,16 +262,17 @@ func HelpEntrypoint(c *Command, args []string) (err error) {
 				if len(path) > 0 {
 					path = path + " "
 				}
-				fmt.Fprintf(w, "\t%s -%s=%s\t%s\n\n",
+				fmt.Fprintf(w, "\t%s -%s=%s\t%s\n",
 					op.Path(),
-					i,
+					strings.ToLower(i),
 					om.Default(),
 					om.Description())
-				w.Flush()
-				out += b.String()
-				b.Reset()
 			}
 		}
+		w.Flush()
+		out += b.String()
+		b.Reset()
+		out += "\n"
 	default:
 		cm := c
 		// Print command help information
