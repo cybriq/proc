@@ -189,7 +189,7 @@ func (c *Command) UnmarshalText(t []byte) (err error) {
 				log.E.Ln("option type unknown:", oo[i].path, op.Type())
 			}
 		} else {
-			log.E.Ln("option not found:", oo[i].path)
+			log.D.Ln("option not found:", oo[i].path)
 		}
 	}
 	return nil

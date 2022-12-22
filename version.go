@@ -1,4 +1,7 @@
-package proc
+// Package indra is the root level package for Indranet, a low latency, 
+// Lightning Network monetised distributed VPN protocol designed for providing
+// strong anonymity to valuable internet traffic.
+package indra
 
 import (
 	"fmt"
@@ -10,19 +13,19 @@ var (
 	// GitRef is the gitref, as in refs/heads/branchname.
 	GitRef = "refs/heads/master"
 	// ParentGitCommit is the commit hash of the parent HEAD.
-	ParentGitCommit = "0d44180a71cd218cdb9a345e0888d8bc563b5f01"
+	ParentGitCommit = "efb9b59c45b248d52dbd12706b03da6549735942"
 	// BuildTime stores the time when the current binary was built.
-	BuildTime = "2022-12-21T18:29:06Z"
+	BuildTime = "2022-12-22T15:52:59Z"
 	// SemVer lists the (latest) git tag on the build.
-	SemVer = "v0.2.0"
+	SemVer = "v0.20.1"
 	// PathBase is the path base returned from runtime caller.
 	PathBase = "/home/loki/src/github.com/cybriq/proc/"
 	// Major is the major number from the tag.
 	Major = 0
 	// Minor is the minor number from the tag.
-	Minor = 2
+	Minor = 20
 	// Patch is the patch version number from the tag.
-	Patch = 0
+	Patch = 1
 )
 
 // Version returns a pretty printed version information string.
