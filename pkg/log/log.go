@@ -144,6 +144,7 @@ var (
 	// allSubsystems stores all package subsystem names found in the current
 	// application.
 	allSubsystems []string
+	CodeLoc       = false
 )
 
 func GetAllSubsystems() (o []string) {
@@ -216,6 +217,9 @@ func SetLogLevel(l LogLevel) {
 // I have used a shell variable there but tilix doesn't expand them,
 // so put your GOPATH in manually, and obviously change the repo subpath.
 func GetLoc(skip int, subsystem string) (output string) {
+	if !CodeLoc {
+		return ""
+	}
 	_, file, line, _ := runtime.Caller(skip)
 	defer func() {
 		if r := recover(); r != nil {
@@ -244,8 +248,9 @@ func GetLoc(skip int, subsystem string) (output string) {
 	return
 }
 
-// timeStampFormat is a custom time format that provides millisecond precision.
-var timeStampFormat = "2006-01-02T15:04:05.000000Z07:00"
+// LocTimeStampFormat is a custom time format that provides millisecond precision.
+var LocTimeStampFormat = "2006-01-02T15:04:05.000000Z07:00"
+var timeStampFormat = time.Stamp
 
 // SetTimeStampFormat sets a custom timeStampFormat for the logger
 func SetTimeStampFormat(format string) {
@@ -254,8 +259,8 @@ func SetTimeStampFormat(format string) {
 
 // getTimeText is a helper that returns the current time with the
 // timeStampFormat that is configured.
-func getTimeText() string {
-	return time.Now().Format(timeStampFormat)
+func getTimeText(tsf string) string {
+	return time.Now().Format(tsf)
 }
 
 // joinStrings constructs a string from a slice of interface same as Println but
@@ -281,11 +286,23 @@ func logPrint(
 ) func() {
 	return func() {
 		if level > Off && level <= logLevel {
+			formatString := "%v%s%s%-6v %s\n"
+			loc := ""
+			tsf := timeStampFormat
+			if CodeLoc {
+				formatString = "%-58v%s%s%-6v %s\n"
+				loc = GetLoc(3, subsystem)
+				tsf = LocTimeStampFormat
+			}
+			var app string
+			if len(App) > 0 {
+				fmt.Sprint(" [" + App + "]")
+			}
 			s := fmt.Sprintf(
-				"%-58v%s%s%-6v %s\n",
-				GetLoc(3, subsystem),
-				color.Gray.Sprint(getTimeText()),
-				fmt.Sprint(" ["+App+"]"),
+				formatString,
+				loc,
+				color.Gray.Sprint(getTimeText(tsf)),
+				app,
 				LevelSpecs[level].Colorizer(
 					" "+LevelSpecs[level].Name+" ",
 				),

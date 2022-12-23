@@ -88,11 +88,21 @@ loaded from at application startup, and where it will be written if changed.
 			Aliases:     []string{"DD"},
 			Label:       "Data Directory",
 			Description: "root folder where application data is stored",
-			Documentation: strings.TrimSpace(`
-
-`),
-			Default: defaultDataDir,
+			Default:     defaultDataDir,
 		}, text.NormalizeFilesystemPath(abs, appName)),
+
+		"LogCodeLocations": toggle.New(meta.Data{
+			Aliases:     []string{"LC"},
+			Label:       "Log Code Locations",
+			Description: "whether to print code locations in logs",
+			Documentation: strings.TrimSpace(strings.TrimSpace(`
+Toggles on and off the printing of code locations in logs.
+`)),
+			Default: "false",
+		}, func(o *toggle.Opt) (err error) {
+			log2.CodeLoc = o.Value().Bool()
+			return
+		}),
 
 		"LogLevel": text.New(meta.Data{
 			Aliases: []string{"LL"},
@@ -152,11 +162,11 @@ Enables the writing of logs to the file path defined in LogFilePath.
 			Default: "false",
 		}, func(o *toggle.Opt) (err error) {
 			if o.Value().Bool() {
-				log.D.Ln("starting log file writing")
+				log.T.Ln("starting log file writing")
 				err = log2.StartLogToFile()
 			} else {
 				err = log2.StopLogToFile()
-				log.D.Ln("stopped log file writing")
+				log.T.Ln("stopped log file writing")
 			}
 			log.E.Chk(err)
 			return
