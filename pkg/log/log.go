@@ -286,11 +286,11 @@ func logPrint(
 			formatString := "%v%s%s%-6v %s\n"
 			loc := ""
 			tsf := timeStampFormat
-			// if CodeLoc {
-			formatString = "%-58v%s%s%-6v %s\n"
-			loc = GetLoc(3, subsystem)
-			tsf = LocTimeStampFormat
-			// }
+			if CodeLoc {
+				formatString = "%-58v%s%s%-6v %s\n"
+				loc = GetLoc(3, subsystem)
+				tsf = LocTimeStampFormat
+			}
 			var app string
 			if len(App) > 0 {
 				fmt.Sprint(" [" + App + "]")
