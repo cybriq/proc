@@ -1,7 +1,4 @@
-// Package indra is the root level package for Indranet, a low latency, 
-// Lightning Network monetised distributed VPN protocol designed for providing
-// strong anonymity to valuable internet traffic.
-package indra
+package proc
 
 import (
 	"fmt"
@@ -13,9 +10,9 @@ var (
 	// GitRef is the gitref, as in refs/heads/branchname.
 	GitRef = "refs/heads/master"
 	// ParentGitCommit is the commit hash of the parent HEAD.
-	ParentGitCommit = "e2a2931897cff030b29c19e33a54b649a939ea94"
+	ParentGitCommit = "c8cd6e66f4d99455253d3f374be60b68ad531d57"
 	// BuildTime stores the time when the current binary was built.
-	BuildTime = "2022-12-23T18:23:27Z"
+	BuildTime = "2022-12-23T18:25:40Z"
 	// SemVer lists the (latest) git tag on the build.
 	SemVer = "v0.20.4"
 	// PathBase is the path base returned from runtime caller.
