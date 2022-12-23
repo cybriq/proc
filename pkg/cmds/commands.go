@@ -92,7 +92,7 @@ loaded from at application startup, and where it will be written if changed.
 		}, text.NormalizeFilesystemPath(abs, appName)),
 
 		"LogCodeLocations": toggle.New(meta.Data{
-			Aliases:     []string{"LC"},
+			Aliases:     []string{"LCL"},
 			Label:       "Log Code Locations",
 			Description: "whether to print code locations in logs",
 			Documentation: strings.TrimSpace(strings.TrimSpace(`

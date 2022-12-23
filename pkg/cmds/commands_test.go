@@ -61,32 +61,39 @@ func TestCommand_UnmarshalText(t *testing.T) {
 }
 
 func TestCommand_ParseCLIArgs(t *testing.T) {
-	log2.SetLogLevel(log2.Info)
-	args1 := "/random/path/to/server_binary --cafile ~/some/cafile --LC=cn node -addrindex --BD 48h30s"
+	log2.SetLogLevel(log2.Trace)
+	args1 := "/random/path/to/server_binary --cafile ~/some/cafile --LC=cn node -addrindex --BD=5m"
 	args1s := strings.Split(args1, " ")
-	o, _ := Init(GetExampleCommands(), nil)
+	ec := GetExampleCommands()
+	o, _ := Init(ec, nil)
 	run, _, err := o.ParseCLIArgs(args1s)
 	if log.E.Chk(err) {
 		t.FailNow()
 	}
 	_, _ = run, err
-	args2 := "/random/path/to/server_binary node -addrindex --BD=48h30s  -RPCMaxConcurrentReqs -16 dropaddrindex "
-	args2s := strings.Split(args2, " ")
-	run, _, err = o.ParseCLIArgs(args2s)
-	if log.E.Chk(err) {
-		t.FailNow()
-	}
 	args3 := "node -addrindex --BD 48h30s dropaddrindex somegarbage --autoports"
 	args3s := strings.Split(args3, " ")
 	run, _, err = o.ParseCLIArgs(args3s)
 	// This one must fail, 'somegarbage' is not a command and has no -/-- prefix
-	log.I.Ln("error expected")
+	log.T.Ln("error expected")
 	if err == nil {
 		t.FailNow()
 	}
-	args4 := "/random/path/to/server_binary --cafile ~/some/cafile --LC=cn"
+	args4 := "/random/path/to/server_binary --lcl"
 	args4s := strings.Split(args4, " ")
 	run, _, err = o.ParseCLIArgs(args4s)
+	if log.E.Chk(err) {
+		t.FailNow()
+	}
+	args5 := "/random/path/to/server_binary --cafile ~/some/cafile --LC=cn --lcl"
+	args5s := strings.Split(args5, " ")
+	run, _, err = o.ParseCLIArgs(args5s)
+	if log.E.Chk(err) {
+		t.FailNow()
+	}
+	args2 := "/random/path/to/server_binary node -addrindex --BD=48h30s  -RPCMaxConcurrentReqs -16 dropaddrindex"
+	args2s := strings.Split(args2, " ")
+	run, _, err = o.ParseCLIArgs(args2s)
 	if log.E.Chk(err) {
 		t.FailNow()
 	}

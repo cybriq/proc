@@ -137,30 +137,37 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, runArgs []string, err 
 										// check for booleans, which can only be
 										// followed by true or false
 										if cmd.Configs[cfgName].Type() == meta.Bool {
-											if len(iArgs)-1 > cursor {
+											if len(iArgs) <= cursor {
+												log.I.Ln("bing")
 												err = cmd.Configs[cfgName].
 													FromString(iArgs[cursor+1])
+											} else {
+												err = cmd.Configs[cfgName].
+													FromString("true")
 											}
+											inc++
+											found = true
 											// next value is not a truth value,
 											// simply assign true and increment
 											// only 1 to cursor
 											if err != nil {
 												log.T.Chk(err)
 												found = true
-												log.T.F("assigned value 'true' to %s",
+												log.I.F("assigned value 'true' to %s",
 													cfgName)
 												break
 											}
+										} else {
+											log.T.F("assigning value '%s' to %s",
+												iArgs[cursor+1], cfgName)
+											err = cmd.Configs[cfgName].
+												FromString(iArgs[cursor+1])
+											if log.E.Chk(err) {
+												return
+											}
+											inc++
+											found = true
 										}
-										log.T.F("assigning value '%s' to %s",
-											iArgs[cursor+1], cfgName)
-										err = cmd.Configs[cfgName].
-											FromString(iArgs[cursor+1])
-										if log.E.Chk(err) {
-											return
-										}
-										inc++
-										found = true
 									}
 								}
 							}
@@ -172,7 +179,7 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, runArgs []string, err 
 							}
 							// if this is the last arg, and it's bool, the
 							// implied value is true
-						} else if cmd.Configs[arg].Type() == meta.Bool {
+						} else if cmd.Configs[arg] != nil && cmd.Configs[arg].Type() == meta.Bool {
 							err = cmd.Configs[arg].FromString("true")
 							if log.E.Chk(err) {
 								return
@@ -187,7 +194,7 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, runArgs []string, err 
 				} else {
 					err = fmt.Errorf("argument %s missing '-', context %s, "+
 						"most likely misspelled subcommand", arg, iArgs)
-					log.E.Chk(err)
+					log.T.Chk(err)
 					return
 				}
 				cursor += inc

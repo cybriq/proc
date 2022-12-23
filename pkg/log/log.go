@@ -144,7 +144,7 @@ var (
 	// allSubsystems stores all package subsystem names found in the current
 	// application.
 	allSubsystems []string
-	CodeLoc       = false
+	CodeLoc       = true
 )
 
 func GetAllSubsystems() (o []string) {
@@ -217,9 +217,6 @@ func SetLogLevel(l LogLevel) {
 // I have used a shell variable there but tilix doesn't expand them,
 // so put your GOPATH in manually, and obviously change the repo subpath.
 func GetLoc(skip int, subsystem string) (output string) {
-	if !CodeLoc {
-		return ""
-	}
 	_, file, line, _ := runtime.Caller(skip)
 	defer func() {
 		if r := recover(); r != nil {
@@ -289,11 +286,11 @@ func logPrint(
 			formatString := "%v%s%s%-6v %s\n"
 			loc := ""
 			tsf := timeStampFormat
-			if CodeLoc {
-				formatString = "%-58v%s%s%-6v %s\n"
-				loc = GetLoc(3, subsystem)
-				tsf = LocTimeStampFormat
-			}
+			// if CodeLoc {
+			formatString = "%-58v%s%s%-6v %s\n"
+			loc = GetLoc(3, subsystem)
+			tsf = LocTimeStampFormat
+			// }
 			var app string
 			if len(App) > 0 {
 				fmt.Sprint(" [" + App + "]")
