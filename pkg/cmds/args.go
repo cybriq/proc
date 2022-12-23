@@ -83,7 +83,7 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, runArgs []string, err 
 		if len(segments[i]) > 0 {
 			iArgs := segments[i][1:]
 			cmd := commands[i]
-			// log.D.Ln(commands[i].Name, "args", iArgs)
+			// log.T.Ln(commands[i].Name, "args", iArgs)
 			// the final command can accept arbitrary arguments, that are passed
 			// into the endrypoint
 			runArgs = iArgs
@@ -98,14 +98,14 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, runArgs []string, err 
 					cursor++
 					continue
 				}
-				log.D.Ln("evaluating", arg, iArgs[cursor:])
+				log.T.Ln("evaluating", arg, iArgs[cursor:])
 				if strings.HasPrefix(arg, "-") {
 					arg = arg[1:]
 					if strings.HasPrefix(arg, "-") {
 						arg = arg[1:]
 					}
 					if strings.Contains(arg, "=") {
-						log.D.Ln("value in arg", arg)
+						log.T.Ln("value in arg", arg)
 						split := strings.Split(arg, "=")
 						if len(split) > 2 {
 							split = append(split[:1], strings.Join(split[1:], "="))
@@ -116,7 +116,7 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, runArgs []string, err 
 								[]string{cfgName}, aliases...)
 							for _, name := range names {
 								if util.Norm(name) == util.Norm(split[0]) {
-									log.D.F("assigning value '%s' to %s",
+									log.T.F("assigning value '%s' to %s",
 										split[1], split[0])
 									err = cmd.Configs[cfgName].FromString(split[1])
 									if log.E.Chk(err) {
@@ -137,20 +137,22 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, runArgs []string, err 
 										// check for booleans, which can only be
 										// followed by true or false
 										if cmd.Configs[cfgName].Type() == meta.Bool {
-											err = cmd.Configs[cfgName].
-												FromString(iArgs[cursor+1])
+											if len(iArgs)-1 > cursor {
+												err = cmd.Configs[cfgName].
+													FromString(iArgs[cursor+1])
+											}
 											// next value is not a truth value,
 											// simply assign true and increment
 											// only 1 to cursor
 											if err != nil {
-												log.D.Chk(err)
+												log.T.Chk(err)
 												found = true
-												log.D.F("assigned value 'true' to %s",
+												log.T.F("assigned value 'true' to %s",
 													cfgName)
 												break
 											}
 										}
-										log.D.F("assigning value '%s' to %s",
+										log.T.F("assigning value '%s' to %s",
 											iArgs[cursor+1], cfgName)
 										err = cmd.Configs[cfgName].
 											FromString(iArgs[cursor+1])
@@ -211,7 +213,7 @@ func (c *Command) ParseCLIArgs(a []string) (run *Command, runArgs []string, err 
 				def)
 		}
 	}
-	// log.D.F("will be executing command '%s' %s", run.Name, runArgs)
+	// log.T.F("will be executing command '%s' %s", run.Name, runArgs)
 
 	return
 }
