@@ -98,7 +98,7 @@ loaded from at application startup, and where it will be written if changed.
 			Documentation: strings.TrimSpace(strings.TrimSpace(`
 Toggles on and off the printing of code locations in logs.
 `)),
-			Default: "false",
+			Default: "true",
 		}, func(o *toggle.Opt) (err error) {
 			log2.CodeLoc = o.Value().Bool()
 			return

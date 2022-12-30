@@ -22,7 +22,7 @@ func (e Envs) ForEach(fn func(env string, opt config.Option) (err error)) (err e
 		for j := range e[i].Name {
 			name = append(name, strings.ToUpper(e[i].Name[j]))
 		}
-		err = fn(strings.Join(name, "_"), nil)
+		err = fn(strings.Join(name, "_"), e[i].Opt)
 		if err != nil {
 			return
 		}
@@ -34,6 +34,7 @@ func (e Envs) LoadFromEnvironment() (err error) {
 	err = e.ForEach(func(env string, opt config.Option) (err error) {
 		v, exists := os.LookupEnv(env)
 		if exists {
+			log.I.S(v, env, opt)
 			err = opt.FromString(v)
 			if log.D.Chk(err) {
 				return err
